@@ -19,5 +19,4 @@ public class Main {
 		dentryProcessor.process();
 		logMsgProcessor.process();
 	}
-
 }

@@ -28,7 +28,6 @@ import com.bes.common.svn.kit.db.FileDiff;
 
 public class SVNDiff {
 	static String address = "svn://127.0.0.1/";
-
 	static SVNURL url;
 
 	static {

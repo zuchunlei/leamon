@@ -1,4 +1,4 @@
-package com.bes.common.svnkit;
+package com.bes.common.svn.kit.test;
 
 import org.tmatesoft.svn.core.SVNDirEntry;
 

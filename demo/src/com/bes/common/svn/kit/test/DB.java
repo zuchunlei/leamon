@@ -1,4 +1,4 @@
-package com.bes.common.svnkit;
+package com.bes.common.svn.kit.test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

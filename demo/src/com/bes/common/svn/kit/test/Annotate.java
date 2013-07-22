@@ -1,4 +1,4 @@
-package com.bes.common.svnkit;
+package com.bes.common.svn.kit.test;
 
 public class Annotate {
 

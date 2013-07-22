@@ -9,8 +9,7 @@ import java.text.SimpleDateFormat;
 import org.tmatesoft.svn.core.SVNDirEntry;
 
 public class DBUtil {
-static SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	
+	static SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	static Connection conn;
 	
 	static{

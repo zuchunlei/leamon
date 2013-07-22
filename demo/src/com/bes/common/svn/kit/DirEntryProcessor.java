@@ -8,24 +8,13 @@ import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.io.SVNRepository;
 
-
 public class DirEntryProcessor {
-	
 	public static final String BASICPATH = "";
-	
 	public static String WORKERNAME = "dir entry scan ";
 	
-	/**
-	 * 处理线程数
-	 */
-	int num;
-	
-	/**
-	 * 当前库最大版本号
-	 */
-	long revision;
-	
-	long[] ranges;
+	int num; // 处理线程数
+	long revision; // 当前库最大版本号
+	long[] ranges; 
 	
 	public DirEntryProcessor(int num,long revision){
 		this.num = num;
@@ -71,9 +60,7 @@ public class DirEntryProcessor {
 	}
 	
 	class DirEntryWorker implements Runnable{
-		
 		private long begin;
-		
 		private long end;
 		
 		public DirEntryWorker(long begin,long end){
@@ -89,7 +76,6 @@ public class DirEntryProcessor {
 				listDirEntry(repository, BASICPATH, i, handler);
 			}
 		}
-		
 	}
 	
 	class DirEntryHandler {

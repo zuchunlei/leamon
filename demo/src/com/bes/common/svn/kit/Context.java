@@ -13,20 +13,8 @@ import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
 public class Context {
-
-	private static final String REPO_ADDRESS = "svn.repository.address";
-	private static final String AUTH_USERNAME = "svn.auth.username";
-	private static final String AUTH_PASSWORD = "svn.auth.password";
 	private static final String LOG_PNUM = "svn.log.pnum";
-	private static final String ENTRY_PNUM = "svn.entry.pnum";
-	private static final String JDBC_URL = "jdbc.url";
-	private static final String JDBC_DRIVER = "jdbc.driver";
-	private static final String JDBC_USERNAME = "jdbc.username";
-	private static final String JDBC_PASSWORD = "jdbc.password";
-	
 	private static final int DEFAULT_LOG_PNUM = 2;
-	
-	private static final int DEFAULT_ENTRY_PNUM = 4;
 	
 	private static Properties prop = new Properties() ;
 	
@@ -74,5 +62,4 @@ public class Context {
 	public static long getLatestRevision(){
 		return 800;
 	}
-	
 }

@@ -3,29 +3,17 @@ package com.bes.common.svn.kit.db;
 import java.io.Serializable;
 
 public class FileDiff implements Serializable {
-
 	private static final long serialVersionUID = 8047684480755503271L;
 
 	private String path;
-
 	private String op;
-
 	private String type;
-
 	private String copiedPath;
-
 	private long copiedRevision;
-
 	private int line;
-
 	private long revision;
-
 	private String log;
 
-	{
-		copiedRevision = -1;
-	}
-	
 	public String getPath() {
 		return path;
 	}
@@ -89,5 +77,4 @@ public class FileDiff implements Serializable {
 	public void setLog(String log) {
 		this.log = log;
 	}
-
 }
