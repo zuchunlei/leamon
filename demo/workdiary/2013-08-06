@@ -1,0 +1,4 @@
+datacollector的consumer的实现
+
+1.根据consumer的配置文件来定位该consumer应该监视哪个queue或者哪几个queue上
+2.根据consumer的配置文件来分析从指定的queue上接收到的message应该采用哪个持久化的策略进行处理

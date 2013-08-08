@@ -3,6 +3,8 @@ package com.bes.common.net;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * 网络回显服务
@@ -13,6 +15,7 @@ public class EchoServer {
 
 	private ServerSocket servSock;
 	private volatile boolean start;
+	private BlockingQueue<Socket> blockQueue = new LinkedBlockingQueue<Socket>();
 
 	public EchoServer(int port, int backlog) {
 		try {
@@ -27,15 +30,15 @@ public class EchoServer {
 		this(DEFAULT_PORT, DEFAULT_ACCEPT_NUM);
 	}
 
-	public void handleConnect() {
+	public void handleAccept() {
 		checkConnect();
 		try {
 			while (start) {
 				Socket sock = servSock.accept();
-				new Thread(new ConnectHandler(sock)).start();
+				blockQueue.put(sock);
 			}
-		} catch (IOException e) {
-			throw new RuntimeException("网络I/O时失败!");
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage());
 		} finally {
 			if (servSock != null) {
 				try {
@@ -54,18 +57,41 @@ public class EchoServer {
 	private void checkConnect() {
 
 	}
-
-}
-
-class ConnectHandler implements Runnable {
-	private Socket conn;
-
-	public ConnectHandler(Socket socket) {
-		this.conn = socket;
+	
+	public void waitShutDown(){
+		try {
+			while (start) {
+				Thread.sleep(1000 * 3);
+			}
+		} catch (Exception e) {
+		}
 	}
 
-	@Override
-	public void run() {
-		// 进行IO操作的相关代码
+	private void doStart(){
+		Runnable runnable = new Runnable() {
+			@Override
+			public void run() {
+				Socket socket = EchoServer.this.blockQueue.poll();
+				EchoServer.this.handleSocket(socket);
+			}
+		};
+		Thread thread = new Thread(runnable);
+		thread.setDaemon(true);
+		thread.start();
+	}
+	
+	public void handleSocket(Socket sock){
+		
+	}
+	
+	public static void main(String[] args) {
+		final EchoServer server = new EchoServer();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				server.handleAccept();
+			}
+		}).start();
+		server.waitShutDown();
 	}
 }

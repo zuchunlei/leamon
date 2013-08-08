@@ -2,6 +2,9 @@ package com.bes.common.corba;
 
 import test._HelloImplBase;
 
+/**
+ * servant 
+ */
 public class HelloImpl extends _HelloImplBase {
 	private static final long serialVersionUID = 6659718914623348121L;
 
