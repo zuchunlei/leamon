@@ -23,6 +23,7 @@ class HttpDemo(object):
 
 if __name__ == '__main__':
     hd = HttpDemo('www.baidu.com')
+
     hd.request()
     hd.result()
 
