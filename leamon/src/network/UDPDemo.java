@@ -32,4 +32,14 @@ public class UDPDemo {
 	public String recv() throws Exception {
 		return null;
 	}
+
+	public static void main(String[] args) {
+		try {
+			DatagramSocket socket1 = new DatagramSocket(1000);
+			socket1.setReuseAddress(true);
+			DatagramSocket socket2 = new DatagramSocket(1000);
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+	}
 }
