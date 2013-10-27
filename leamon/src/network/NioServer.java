@@ -7,6 +7,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -51,18 +52,21 @@ public class NioServer {
 			SocketChannel channel = servChannel.accept();
 			channel.configureBlocking(false);
 			channel.register(key.selector(), SelectionKey.OP_READ);
-		}
-		if (key.isReadable()) {
+		} else if (key.isReadable()) {
 			SocketChannel channel = (SocketChannel) key.channel();
 			ByteBuffer buffer = ByteBuffer.allocate(1000);
-			channel.read(buffer);
-			channel.register(key.selector(), SelectionKey.OP_READ
-					| SelectionKey.OP_WRITE);
-		}
-		if (key.isWritable()) {
+			int len = channel.read(buffer);
+			if (len == -1) {
+				channel.close();
+			} else {
+				channel.register(key.selector(), SelectionKey.OP_READ
+						| SelectionKey.OP_WRITE);
+			}
+		} else if (key.isWritable()) {
 			SocketChannel channel = (SocketChannel) key.channel();
+			Date date = new Date();
 			ByteBuffer buffer = ByteBuffer.allocate(1000);
-			buffer.put("×æ´ºÀ×".getBytes());
+			buffer.put(date.toString().getBytes());
 			buffer.flip();
 			channel.write(buffer);
 			channel.register(key.selector(), SelectionKey.OP_READ);
