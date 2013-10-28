@@ -39,7 +39,7 @@ public class NioServer {
 
 			while (iter.hasNext()) {
 				SelectionKey key = iter.next();
-				iter.remove();
+				iter.remove();// 必须手动删除当前选择的key，要不该key永久存在于selector的选择就绪键集中。
 				handle(key);// 处理选择键
 			}
 		}
