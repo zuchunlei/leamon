@@ -63,6 +63,5 @@ public class FileTester {
 
 		in.close();
 		out.close();
-
 	}
 }
