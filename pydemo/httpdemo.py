@@ -1,29 +1,23 @@
-#*-* coding:utf-8 -*-
-
 import httplib
+import urllib
 
+class D(object):
 
-class HttpDemo(object):
-    """
-        this is a class named HttpDemo
-    """
+	def __init__(self,host,port=80):
+		self.conn = httplib.HTTPConnection(host,port)
 
-    def __init__(self, host, port=80):
-        self.__conn = httplib.HTTPConnection(host, port)
+	def close(self):
+		if self.conn:
+			self.conn.close()
 
-    def request(self, path='/'):
-        self.__conn.request('get', path)
+	def post(self,path):
+		params = {'name':'祖春雷'}
+		params = urllib.urlencode(params)
+		headers = {"Content-type":"application/x-www-form-urlencoded","Accept":"text/plain"}  
+		self.conn.request('GET',path,params,headers)
 
-    def result(self):
-        reply = self.__conn.getresponse()
-        data = reply.read()
-
-        print data
-
-
-if __name__ == '__main__':
-    hd = HttpDemo('www.baidu.com')
-
-    hd.request()
-    hd.result()
-
+	def result(self):
+		reply = self.conn.getresponse()
+		print ' %s %s' % (reply.status,reply.reason)
+		for line in reply.read():
+			print line,

@@ -1,29 +1,31 @@
-#-*- coding: utf-8 -*-
-import socket
+import urllib
 
+class NetWork(object):
+	""" this class named NetWork """
+	conn = []
 
-class NetWorkConnection(object):
-    """
-    the class is a net connection
-    """
-    def __init__(self, host, port):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        address = (host, port)
-        self.sock.connect(address)
+	def __init__(self,url,number=100):
+		""" 
+			constructor for the instance of NetWork 
+		"""
+		self.__url = url
+		self.__number = number
 
-    def send(self, path):
-        try:
-            fd = open(path)
-            data = fd.read()
-            self.sock.send(data)
-        except IOError, e:
-            print '%s' % e
+	def connect(self):
+		"""
+			create the connection of the url 
+		"""
+		for i in xrange(self.__number):
+			connection = urllib.urlopen(self.__url)
+			NetWork.conn.append(connection)
 
-    def close(self):
-        self.sock.close()
+	def close(self):
+		tmpconn = []
+		""" close the to url connection """
+		for connection in NetWork.conn :
+			if connection.geturl()==self.__url :
+				connection.close()
+				tmpconn.append(connection)
 
-
-if __name__ == '__main__':
-    nwc = NetWorkConnection('192.168.40.6', 7788)
-    nwc.send('f://1.txt')
-    nwc.close()
+		for connection in tmpconn :
+			NetWork.conn.remove(connection)
