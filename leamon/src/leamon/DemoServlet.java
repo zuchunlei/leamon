@@ -1,9 +1,5 @@
 package leamon;
 
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 
 //public class DemoServlet extends HttpServlet {
 //

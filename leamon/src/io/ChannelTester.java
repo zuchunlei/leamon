@@ -1,16 +1,26 @@
 package io;
 
 import java.io.FileInputStream;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 public class ChannelTester {
 
 	public static void main(String[] args) throws Exception {
-		FileInputStream in = new FileInputStream("/root/1.txt");
-		FileChannel channel = in.getChannel();
 
-		channel.close();// channel关闭，相关的流也自动关闭
-		in.close();
+		FileInputStream fis = new FileInputStream("D:/nio应注意问题.txt");
+		FileChannel channel = fis.getChannel();
+
+		ByteBuffer buffer = ByteBuffer.allocate(100);
+		for(int i=0;i<buffer.capacity();i++){
+			buffer.put((byte)i);
+		}
+		
+		int length = channel.write(buffer);
+		System.out.println(length);
+
+		channel.close();
+		fis.close();
 	}
 
 }
