@@ -24,6 +24,18 @@ SelectionKey  就绪事件
 Channel  读就绪  （SelectionKey.OP_READ） 写就绪（SelectionKey.OP_WRITE） 接受就绪（SelectionKey.OP_CONNECT） 连接就绪（SelectionKey.OP_ACCEPT）
 
 如果SelectionKey中的就绪事件没有被Channel消费掉，则Selector的选择操作立即返回。selector依然认为某一通道有事件到达。
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Buffer、状态标识（position，limit，capacity）
+写模式：向Buffer中填充/写入数据。
+写模式的两种方式：一，put系列的方法。二，使用Channel.read(Buffer)来将Channel中的数据写进Buffer缓冲区中。
+状态信息：每写入一单元数据，position递增1。limit与capacity相等，表示最多允许写入多少单位数据进Buffer中。
+
+读模式：从Buffer中提取/读出数据。
+读模式的两种方式：一，get系列的方法。二，使用Channel.write(Buffer)来将Buffer缓冲区的数据写入到Channel中。
+状态信息：每读出一单元数据，position递增1。limit与capacity一般情况下不等（缓冲区满时相等），limit表示最多还有多少单位数据可以被读出。
+
+flip：Buffer从写模式转换成读模式。只有在读模式下，才可以获取缓冲区的数据，其他状态下不正确。
+
 --------------------------------------------------------------------------------------------------------------------
 
 Channel ------>  SelectionKey  : channel.keyFor(selector)   Channel通过Selector获得关联的SelectionKey
