@@ -36,6 +36,8 @@ Buffer、状态标识（position，limit，capacity）
 
 flip：Buffer从写模式转换成读模式。只有在读模式下，才可以获取缓冲区的数据，其他状态下不正确。
 
+如果一个方法参数只接受byte[]，而你将ByteBuffer.array()方式返回的字节数组传递给方法，则ByteBuffer内部的状态不会改变。该方式为Buffer不正确使用方式！
+
 --------------------------------------------------------------------------------------------------------------------
 
 Channel ------>  SelectionKey  : channel.keyFor(selector)   Channel通过Selector获得关联的SelectionKey
