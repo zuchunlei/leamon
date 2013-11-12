@@ -1,0 +1,5 @@
+socket receive buffer
+
+ServerSocket的receive buffer 设置size以后，
+所有通过ServerSocket accept返回的Socket对象的继承了ServerSocket的receiver buffer大小。
+但是Socket对象可以在之后改变他自身的发送缓冲区(SendBuffer)大小与接受缓冲区(ReceiveBuffer)大小。

@@ -19,55 +19,62 @@ public class MemberShip {
 	public static SocketAddress multicast_addr = new InetSocketAddress(
 			"228.5.6.7", 54321);
 
-	//private Map<Member, SocketAddress> membermap = new ConcurrentHashMap<Member, SocketAddress>();
+	// private Map<Member, SocketAddress> membermap = new
+	// ConcurrentHashMap<Member, SocketAddress>();
 	private List<Member> memberlist = new ArrayList<Member>();
 	private long interval = 1000 * 10;
 
+	MulticastSocket multicastSock;
+	DatagramSocket sock;
+
 	public void go() throws Exception {
-		MulticastSocket multicastSock = new MulticastSocket(54321);
+		multicastSock = new MulticastSocket(54321);
 		multicastSock.joinGroup(InetAddress.getByName("228.5.6.7"));
 		Timer timer = new Timer("member_receiver");
 		timer.scheduleAtFixedRate(new MemberReceiver(multicastSock), 0, 2000);
-
-		DatagramSocket sock = new DatagramSocket();
+		sock = new DatagramSocket();
 		timer = new Timer("member_sender");
 		timer.scheduleAtFixedRate(new MemberSender(sock), 0, 2000);
 
-		timer = new Timer("self_check");
-		timer.scheduleAtFixedRate(new SelfCheck(), 0, 10000);
+		// timer = new Timer("self_check");
+		// timer.scheduleAtFixedRate(new SelfCheck(), 0, 10000);
 	}
 
 	class SelfCheck extends TimerTask {
 
 		@Override
 		public void run() {
-//			Iterator<Member> iter = membermap.keySet().iterator();
-//			long time = System.currentTimeMillis();
-//			while (iter.hasNext()) {
-//				Member member = iter.next();
-//				if (time - member.getTime() > interval) {
-//					iter.remove();
-//				}
-//			}
-//			System.out.println(membermap.size());
+			// Iterator<Member> iter = membermap.keySet().iterator();
+			// long time = System.currentTimeMillis();
+			// while (iter.hasNext()) {
+			// Member member = iter.next();
+			// if (time - member.getTime() > interval) {
+			// iter.remove();
+			// }
+			// }
+			// System.out.println(membermap.size());
 		}
 
 	}
 
+	/**
+	 * 心跳放送线程
+	 */
 	class MemberSender extends TimerTask {
-		DatagramSocket sock;
+		DatagramSocket _sock;
 
 		public MemberSender(DatagramSocket sock) {
-			this.sock = sock;
+			this._sock = sock;
 		}
 
 		public void run() {
+
 			String time = String.valueOf(System.currentTimeMillis());
 			byte[] data = time.getBytes();
 			try {
 				DatagramPacket pack = new DatagramPacket(data, data.length,
 						multicast_addr);
-				sock.send(pack);
+				_sock.send(pack);
 			} catch (SocketException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -76,26 +83,39 @@ public class MemberShip {
 		}
 	}
 
+	/**
+	 * 多播接受线程
+	 */
 	class MemberReceiver extends TimerTask {
-		MulticastSocket sock;
+		MulticastSocket _sock;
+		byte[] buffer;
 
 		public MemberReceiver(MulticastSocket sock) {
-			this.sock = sock;
+			this._sock = sock;
+
 		}
 
 		public void run() {
-			ByteBuffer buffer = ByteBuffer.allocate(100);
-			DatagramPacket pack = new DatagramPacket(buffer.array(),
-					buffer.capacity());
+			buffer = new byte[16];
+			DatagramPacket pack = new DatagramPacket(buffer, buffer.length);
 			try {
-				sock.receive(pack);
-				long time = System.currentTimeMillis();
-				Member member = new Member(time, pack.getAddress()
-						.getHostAddress(), pack.getPort());
+				_sock.receive(pack);
+				long time = Long.valueOf(new String(pack.getData(), 0, pack
+						.getLength()));
+				if (pack.getSocketAddress().equals(
+						sock.getRemoteSocketAddress())
+						|| pack.getSocketAddress().equals(
+								sock.getLocalSocketAddress())) {
+					System.out.println(time);
+				}
 
-//				membermap.put(member, pack.getSocketAddress());
+				// Member member = new Member(time, pack.getAddress()
+				// .getHostAddress(), pack.getPort());
+				// membermap.put(member, pack.getSocketAddress());
 			} catch (IOException e) {
 				e.printStackTrace();
+			} finally {
+				buffer = null;
 			}
 		}
 	}
