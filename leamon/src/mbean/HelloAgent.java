@@ -1,8 +1,5 @@
 package mbean;
 
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
@@ -17,7 +14,7 @@ public class HelloAgent {
 		String jmxServerName = "TestJMXServer";
 
 		// jdkfolder/bin/rmiregistry.exe 9999
-		Registry registry = LocateRegistry.createRegistry(rmiPort);
+//		Registry registry = LocateRegistry.createRegistry(rmiPort);
 
 		MBeanServer mbs = MBeanServerFactory.createMBeanServer(jmxServerName);
 		// MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();

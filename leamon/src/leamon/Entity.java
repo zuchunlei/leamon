@@ -36,8 +36,16 @@ public class Entity implements Serializable {
 				"C:\\java.dump"));
 		Object o = is.readObject();
 		System.out.println(o);
-		
+
 		os.close();
 		is.close();
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public int getAge() {
+		return age;
 	}
 }

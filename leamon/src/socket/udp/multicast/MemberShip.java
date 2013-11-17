@@ -8,9 +8,6 @@ import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -21,8 +18,8 @@ public class MemberShip {
 
 	// private Map<Member, SocketAddress> membermap = new
 	// ConcurrentHashMap<Member, SocketAddress>();
-	private List<Member> memberlist = new ArrayList<Member>();
-	private long interval = 1000 * 10;
+	// private List<Member> memberlist = new ArrayList<Member>();
+	// private long interval = 1000 * 10;
 
 	MulticastSocket multicastSock;
 	DatagramSocket sock;
