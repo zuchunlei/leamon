@@ -29,6 +29,7 @@ public class MemberShip {
 
 	public void go() throws Exception {
 		multicastSock = new MulticastSocket(54321);
+		multicastSock.setLoopbackMode(false);
 		multicastSock.joinGroup(InetAddress.getByName("228.5.6.7"));
 		Timer timer = new Timer("member_receiver");
 		timer.scheduleAtFixedRate(new MemberReceiver(multicastSock), 0, 2000);
