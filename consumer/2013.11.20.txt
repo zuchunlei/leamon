@@ -1,0 +1,3 @@
+工作日志
+1、发现bug，dbstorage中，总结为当String类型为null时，调用getBytes()抛异常，当替换时如果为null替换也是出错的
+value = “null”
