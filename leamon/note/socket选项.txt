@@ -3,3 +3,13 @@ socket receive buffer
 ServerSocket的receive buffer 设置size以后，
 所有通过ServerSocket accept返回的Socket对象的继承了ServerSocket的receiver buffer大小。
 但是Socket对象可以在之后改变他自身的发送缓冲区(SendBuffer)大小与接受缓冲区(ReceiveBuffer)大小。
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Socket选项之 so_linger
+
+当Socket对象底层的网络连接中，Send-Q中存在数据时，close()操作进行阻塞延时。
+ 经过验证，当socket对象设置了solinger选项时，当该socket连接中Send-Q中依然存在着数据为发送到对端的Recv-Q中时，
+ 调用socket.close()方法会延时阻塞。
+ 延时的时间在Socket.setSoLinger()方法中的第二个参数给定指定。
+ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

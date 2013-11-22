@@ -1,0 +1,21 @@
+NIO Reactor模式的设计框架组件说明。
+
+Acceptor：前端的接受线程，一般实现Runnable接口。同ServerSocketChannel在一起，持有一个Selector对象。
+Poller：轮询对象，处理SocketChannel的I/O事件。一般设计为多个，每一个Poller持有一个Selector对象
+Event：统一的事件模型，一般由SelectionKey的attachment所引用着。
+IOChannel：对源生NIO的Channel进行封装，内部含有事件等信息。
+
+
+
+问：Acceptor与Poller之间如何传递SocketChannel？
+答：Acceptor主要负责对“接收就绪”的事件进行消费。
+    Acceptor中持有一个ServerSocketChannel(该Channel已bind)，与一个Selector。
+    ServerSocketChannel.accept()返回的SocketChannel如何传递给Poller成为了问题的关键。
+	一般采用事件线的机制。
+	Poller轮询对象，处理SocketChannel的读写事件。一般存在多个，每一个Poller对象中持有一个Selector。
+	
+	pools<Poller>[n]:轮询对象池，一般n为可用CPU数
+	
+	Acceptor中通过一定的策略从pools中选中一个Poller，将SocketChannel注册到该Poller上。
+	该处使用生产者与消费者模式，事件线Events Line来解决该问题。一般情况下，事件线是一个并发的队列(J.U.C)。
+    
