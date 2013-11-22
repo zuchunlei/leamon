@@ -21,8 +21,9 @@ public class Connector {
 		// 通过给定的host/port尝试去连接远程主机，
 		sockChannel.connect(new InetSocketAddress("baidu.com", 80));
 		// 如果该连接处于pending状态，重复去连接
-		while (sockChannel.isConnectionPending()) {
-			sockChannel.finishConnect();
+		boolean connected = false;
+		while (sockChannel.isConnectionPending() && !connected) {
+			connected = sockChannel.finishConnect();
 		}
 
 		// 返回的是SocketAdaptor
