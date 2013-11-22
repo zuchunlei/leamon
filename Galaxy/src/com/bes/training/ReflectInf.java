@@ -8,7 +8,7 @@ public class ReflectInf {
 
 	public static void reflect(Object a) throws Exception {
 		// 反射获得对象所属的类
-		Class clazz = a.getClass();
+		Class<?> clazz = a.getClass();
 
 		// 获得该类的声明的成员变量和类变量
 		Field[] fields = clazz.getDeclaredFields();
@@ -51,7 +51,7 @@ public class ReflectInf {
 	 */
 	private static String printMethodInf(Method method, Object a) {
 		method.setAccessible(true);
-		Class[] clazzs = method.getParameterTypes();
+		Class<?>[] clazzs = method.getParameterTypes();
 
 		// 今天学到的一点，不同于StringBuffer strbuff = null；
 		StringBuffer strbuff = new StringBuffer();
