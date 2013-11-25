@@ -6,10 +6,17 @@ ServerSocket的receive buffer 设置size以后，
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Socket选项之 so_linger
+Socket.setSoLinger(boolean on, int linger)
 
 当Socket对象底层的网络连接中，Send-Q中存在数据时，close()操作进行阻塞延时。
- 经过验证，当socket对象设置了solinger选项时，当该socket连接中Send-Q中依然存在着数据为发送到对端的Recv-Q中时，
+ 经过验证，当socket对象设置了so_linger选项时，当该socket连接中Send-Q中依然存在着数据为发送到对端的Recv-Q中时，
  调用socket.close()方法会延时阻塞。
  延时的时间在Socket.setSoLinger()方法中的第二个参数给定指定。
  
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Socket选项之 so_keepalive 
+Socket.setKeepAlive(boolean on)
+
+设置Socket的so_keepalive选项。该选项只适用于TCP协议
+当设置了该选项以后，操作系统会对socket底层的tcp连接进行连接探测。默认是关闭的
+不过关于TCP的so_keepalive选项参数由操作系统网络模块进行配置，java程序无能为力。

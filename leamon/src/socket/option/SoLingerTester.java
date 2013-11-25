@@ -25,9 +25,10 @@ public class SoLingerTester {
 		for (int i = 0; i < 10000; i++) {
 			out.write("zu_chunlei".getBytes());
 		}
-
 		// 关闭该socket对象，测试如果Send-Q存在未发送完全的数据时，是否阻塞等待。
 		// 确实阻塞到指定时间后关闭
+		long time = System.currentTimeMillis();
 		sock.close();
+		System.out.println(System.currentTimeMillis() - time);
 	}
 }
