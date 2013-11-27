@@ -1,1 +1,28 @@
+java中的流具有鲜明的特点。单向传输，传输单元为字节。（输入，输出由不同的类负责）。
+
+基础流：定义了单向传输的端点：
+	输入流定义了被传输数据的来源。
+	FileInputStream（数据来源自文件中）
+	ByteArrayInputStream（数据来源自当前地址空间中）
+	PipedInputStream（数据来源自管道的source端）
+	Socket.getInputStream()（数据来源自网络连接的另一端）
+	
+	输出流定义了被传输数据的目的。
+	FileOutputStream（数据将传输到文件中）
+	ByteArrayInputStream（数据将传输到当前地址空间中）
+	PipedOutputStream（数据将传输到管道的sink端）
+	Socket.getOutputStream()（数据将传输到网络连接的另一端）
+	
+注：一个Socket对象（Java层面）代表了一个TCP网络连接（OS层面）。
+
+过滤流：对传输的数据进行额外的处理：
+	缓冲流：BufferedInputStream/BufferedOutputStream
+	数据流：DataInputStream/DataOutputStream
+	对象流：ObjectInputStream/ObjectOutputStream
+	压缩流：
+	摘要流：
+	加密流：
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 问题1：ObjectInputStream的构造细节。
+
