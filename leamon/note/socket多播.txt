@@ -2,4 +2,10 @@
 
 问：java中如何可以让一个多播数据包不回送到本地接口中？
 答：Multicast.setLoopbackMode(false);
-setLoopbackMode:启用/禁用多播数据报的本地回送。平台的网络代码将该选项用作设置是否将多播数据回送到本地套接字的提示。 
+setLoopbackMode:启用/禁用多播数据报的本地回送。
+平台的网络代码将该选项用作设置是否将多播数据回送到本地套接字的提示。 
+
+多播是网络层概念，在编程接口中使用UDP传输层协议来完成多播IP包的发送。
+所以发送多播IP包的Socket占用的UDP端口不一定要与多播IP包的目的端口相同。
+发送多播IP包可以使用普通的UDP Socket。
+注意：多播数据包只能由多播套接字MulticastSocket来接收。
