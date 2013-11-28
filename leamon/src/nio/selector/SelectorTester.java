@@ -8,12 +8,22 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 测试Selector的注册通道的线程安全性。 该实现会导致无数的线程被创建。
  * 因为selector.select()操作会立即返回，当accept事件没有被消费之前。
  */
 public class SelectorTester {
+
+	private ConcurrentHashMap<SelectionKey, ByteBuffer> dataMap;
+	private AtomicBoolean acceptLock;// 连接接受锁
+
+	public SelectorTester() {
+		this.dataMap = new ConcurrentHashMap<SelectionKey, ByteBuffer>();
+		this.acceptLock = new AtomicBoolean();// 默认为false
+	}
 
 	public static void main(String[] args) throws Exception {
 		new SelectorTester().go();
@@ -28,7 +38,7 @@ public class SelectorTester {
 		servChannel.register(selector, SelectionKey.OP_ACCEPT);
 
 		while (true) {
-			int selected = selector.select();
+			int selected = selector.select(1000 * 10);// 沉睡10s
 			if (selected == 0) {
 				continue;
 			}
@@ -40,6 +50,11 @@ public class SelectorTester {
 				// 必须手动删除该选择键，否则在下次选择中，该选择键依然存在。
 				it.remove();
 				new Thread(new Handler(key)).start();
+				// new Handler(key).run();
+				if (key.channel().equals(servChannel)) {// 连接就绪，使用锁来保证该事件只被消费一次
+					while (!acceptLock.compareAndSet(true, false))
+						;
+				}
 			}
 		}
 	}
@@ -59,15 +74,41 @@ public class SelectorTester {
 							.channel();
 					// accept 消费了“接受就绪”事件
 					SocketChannel channel = servChannel.accept();
+					while (!acceptLock.compareAndSet(false, true))
+						;
 					channel.configureBlocking(false);
 					// 该channel第一次注册，如果该Selector处于select状态，则注册不成功。
 					// 因为竞争Selector实例的中publicKeys，导致channel注册阻塞。
 					channel.register(selector, SelectionKey.OP_READ);
+					selector.wakeup();
 				} else if (key.isReadable()) {
+					key.interestOps(key.interestOps() ^ SelectionKey.OP_READ);// 取消关注兴趣读
+
 					SocketChannel channel = (SocketChannel) key.channel();
 					// read消费了“读继续”事件
-					channel.read(ByteBuffer.allocate(1024));
-					channel.register(selector, SelectionKey.OP_WRITE);
+					ByteBuffer buffer = ByteBuffer.allocate(1024);
+					if (channel.read(buffer) == -1) {// read EOF
+						key.cancel();
+						channel.close();
+						return;
+					}
+					// key.attach(buffer);跨选择周期的选择键附件丢失
+					dataMap.put(key, buffer);
+					// channel.register(selector, SelectionKey.OP_WRITE);
+					key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);// 注册兴趣写
+					selector.wakeup();
+				} else if (key.isWritable()) {
+					key.interestOps(key.interestOps() ^ SelectionKey.OP_WRITE);// 取消关注兴趣写
+
+					// 跨选择周期的选择键附件丢失
+					// ByteBuffer buffer = (ByteBuffer) key.attachment();
+					SocketChannel channel = (SocketChannel) key.channel();
+					ByteBuffer buffer = dataMap.get(key);
+					buffer.flip();
+					// write消费了“写就绪”事件
+					channel.write(buffer);
+					key.interestOps(key.interestOps() | SelectionKey.OP_READ);// 重新注册兴趣读
+					selector.wakeup();
 				}
 			} catch (Exception e) {
 				// ignore
