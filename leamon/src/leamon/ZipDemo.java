@@ -38,7 +38,7 @@ public class ZipDemo {
 	public static void ungzip() throws IOException {
 		FileInputStream fis = new FileInputStream("C:\\oz.txt");
 		GZIPInputStream gis = new GZIPInputStream(fis);
-		
+
 		FileOutputStream fos = new FileOutputStream("C:\\oo.txt");
 		byte[] buffer = new byte[1024];
 		int len = 0;
@@ -46,7 +46,7 @@ public class ZipDemo {
 		while ((len = gis.read(buffer)) != -1) {
 			fos.write(buffer, 0, len);
 		}
-		
+
 		gis.close();
 		fos.close();
 	}

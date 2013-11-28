@@ -21,7 +21,7 @@ public class FileChannelTester {
 		File f = map.get(path);
 		OutputStream os = new FileOutputStream(f);
 		System.out.println(os);
-		
+
 		RandomAccessFile file = new RandomAccessFile("C:/1.txt", "rw");
 		FileChannel channel = file.getChannel();
 

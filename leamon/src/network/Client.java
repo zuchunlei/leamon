@@ -11,7 +11,7 @@ public class Client {
 		int d1 = data << 1;
 		int d2 = data >> 1;
 		int d3 = data >>> 1;
-		
+
 		System.out.println(d1);
 		System.out.println(d2);
 		System.out.println(d3);

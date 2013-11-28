@@ -11,7 +11,6 @@ public class DataTester {
 		// b && 0xff 返回的类型是 int
 		System.out.println(b & 0xff);
 
-		
 		// int --> byte
 		int num = -2021956;
 		byte bn = (byte) num;

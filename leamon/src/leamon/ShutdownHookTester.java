@@ -22,9 +22,9 @@ public class ShutdownHookTester {
 				System.exit(0);
 			}
 		}.start();
-		
+
 		try {
-			Thread.sleep(1000*60*60);
+			Thread.sleep(1000 * 60 * 60);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

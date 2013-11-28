@@ -19,7 +19,7 @@ public class ByteBufferTester {
 		// 字符'1','2','3','4'的16进制为0x31，0x32，0x33，0x34
 
 		buffer.flip();
-		
+
 		// 一个字节最多表示256
 		// 1*256^3+2*256^2+3*256^1+4*256^0 其中^代表幂运算
 		int result = buffer.getInt();

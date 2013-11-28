@@ -12,10 +12,10 @@ public class ChannelTester {
 		FileChannel channel = fis.getChannel();
 
 		ByteBuffer buffer = ByteBuffer.allocate(100);
-		for(int i=0;i<buffer.capacity();i++){
-			buffer.put((byte)i);
+		for (int i = 0; i < buffer.capacity(); i++) {
+			buffer.put((byte) i);
 		}
-		
+
 		int length = channel.write(buffer);
 		System.out.println(length);
 
