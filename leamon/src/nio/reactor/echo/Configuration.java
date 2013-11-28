@@ -28,4 +28,8 @@ public class Configuration {
 		}
 		return result;
 	}
+
+	public static String getString(String key) {
+		return prop.getProperty(key).trim();
+	}
 }
