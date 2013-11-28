@@ -1,11 +1,14 @@
 package nio.reactor.echo.server;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -24,17 +27,17 @@ public class Server {
 	private volatile boolean running;
 
 	private Poller[] pollers;// 轮询对象，处理SocketChannel的I/O事件
-	private Executor executor;
+	private AtomicBoolean accept;// 连接请求被接收的标识
 
 	public Server(String host, int port) {
 		this.host = host;
 		this.port = port;
 		this.incr = new AtomicInteger(Integer.MIN_VALUE);
+		this.accept = new AtomicBoolean();
 		this.pollers = new Poller[Runtime.getRuntime().availableProcessors() + 1];// Poller的个数为当前可以CPU+1
 		for (int i = 0; i < pollers.length; i++) {
 			pollers[i] = new Poller();
 		}
-		this.executor = Executors.newFixedThreadPool(2);
 	}
 
 	/**
@@ -47,6 +50,8 @@ public class Server {
 				ServerSocketChannel servSockChannel = ServerSocketChannel
 						.open();
 				servSockChannel.configureBlocking(false);
+				servSockChannel.socket().bind(
+						new InetSocketAddress(host, port), 200);
 				servSockChannel.register(selector, SelectionKey.OP_ACCEPT);
 				while (running) {
 					int selected = selector.select();
@@ -56,6 +61,7 @@ public class Server {
 								.iterator();
 						while (it.hasNext()) {
 							SelectionKey key = it.next();
+							// System.out.println("连接来了");
 							it.remove();// 必须显示的删除
 							if (!key.isValid()) {
 								key.cancel();
@@ -63,8 +69,12 @@ public class Server {
 								break;
 							}
 							// 策略选择一个Poller将该key注册到Poller上。
-							pollers[Math.abs(incr.decrementAndGet()
-									% pollers.length)].registerChannel(key);
+							int offset = Math.abs(incr.decrementAndGet()
+									% pollers.length);
+							pollers[offset].registerChannel(key);
+
+							while (!accept.compareAndSet(true, false))
+								;
 						}
 					}
 				}
@@ -74,23 +84,35 @@ public class Server {
 		}
 	}
 
+	/**
+	 * @author a
+	 * 
+	 */
 	class Poller implements Runnable {
 		private ConcurrentLinkedQueue<SelectionKey> channels;// 等待注册到Poller中的SelectionKey
 		private ConcurrentLinkedQueue<SelectionKey> readkeys;// 读就绪选择键集合
 		private ConcurrentLinkedQueue<SelectionKey> writekeys;// 写就绪选择键集合
 
+		private ConcurrentHashMap<SelectionKey, ByteBuffer> datapools;// 读写通道的数据池
+
 		private AtomicBoolean wakeup;// 唤醒标识，原子类，排他。
 		private Selector selector;
+
+		private Executor executor;// 具体IO执行的线程池
 
 		public Poller() {
 			this.channels = new ConcurrentLinkedQueue<SelectionKey>();
 			this.readkeys = new ConcurrentLinkedQueue<SelectionKey>();
 			this.writekeys = new ConcurrentLinkedQueue<SelectionKey>();
+			this.datapools = new ConcurrentHashMap<SelectionKey, ByteBuffer>();
+
 			this.wakeup = new AtomicBoolean();// 默认为false
+
 			try {
 				this.selector = Selector.open();
 			} catch (IOException e) {
 			}
+			this.executor = Executors.newCachedThreadPool();
 		}
 
 		public void run() {
@@ -105,12 +127,14 @@ public class Server {
 							SelectionKey key = it.next();
 							it.remove();
 							if (key.isValid() && key.isReadable()) {// 处理读就绪事件
-								// 读数据，取消兴趣读，业务处理，注册兴趣写。
+								// 取消兴趣读，读数据，业务处理，注册兴趣写。
+								unRegisterRead(key);// 取消所有兴趣关注点
 								IOReadWork work = new IOReadWork(this, key);
-								key.attach(work);
 								executor.execute(work);
 							}
 							if (key.isValid() && key.isWritable()) {// 处理写就绪事件
+								// 取消兴趣写
+								unRegisterWrite(key);
 								IOWriteWork work = new IOWriteWork(this, key);
 								executor.execute(work);
 							}
@@ -134,6 +158,10 @@ public class Server {
 						ServerSocketChannel servSockChannel = (ServerSocketChannel) key
 								.channel();
 						SocketChannel channel = servSockChannel.accept();
+						while (!accept.compareAndSet(false, true))
+							;
+
+						channel.configureBlocking(false);// 必须将信道配置为非阻塞模式
 						channel.register(selector, SelectionKey.OP_READ);
 					} else {
 						key.cancel();
@@ -211,6 +239,44 @@ public class Server {
 			if (wakeup.compareAndSet(false, true)) {
 				selector.wakeup();
 			}
+		}
+
+		/**
+		 * 取消兴趣读
+		 * 
+		 * @param key
+		 */
+		void unRegisterRead(SelectionKey key) {
+			key.interestOps(key.interestOps() ^ SelectionKey.OP_READ);
+		}
+
+		/**
+		 * 取消兴趣写
+		 * 
+		 * @param key
+		 */
+		void unRegisterWrite(SelectionKey key) {
+			key.interestOps(key.interestOps() ^ SelectionKey.OP_WRITE);
+		}
+
+		/**
+		 * 读写数据的缓冲区
+		 * 
+		 * @param key
+		 * @param buffer
+		 */
+		void putData(SelectionKey key, ByteBuffer buffer) {
+			datapools.put(key, buffer);
+		}
+
+		/**
+		 * 通过Key来获取数据
+		 * 
+		 * @param key
+		 * @return
+		 */
+		ByteBuffer getData(SelectionKey key) {
+			return datapools.get(key);
 		}
 	}
 

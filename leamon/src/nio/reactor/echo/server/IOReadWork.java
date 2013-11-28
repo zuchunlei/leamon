@@ -21,26 +21,19 @@ public class IOReadWork implements Runnable {
 		this.buffer = ByteBuffer.allocate(1024);
 	}
 
-	public ByteBuffer getBuffer() {
-		return buffer;
-	}
-
 	public void run() {
 		// 读取数据，取消兴趣读，业务处理，注册兴趣写。
 		SocketChannel channel = (SocketChannel) key.channel();
 		try {
-			int length = channel.read(buffer);
-			unRegisterRead();
-			System.out.println(length);
+			if (channel.read(buffer) == -1) {
+				key.cancel();
+				key.channel().close();
+				return ;
+			}
+			// unRegisterRead();
+			poller.putData(key, buffer);
 			poller.registerWrite(key);
 		} catch (IOException e) {
 		}
-	}
-
-	/**
-	 * 取消兴趣读
-	 */
-	void unRegisterRead() {
-		key.interestOps(key.interestOps() ^ SelectionKey.OP_READ);
 	}
 }

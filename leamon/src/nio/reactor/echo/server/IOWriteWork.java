@@ -22,22 +22,14 @@ public class IOWriteWork implements Runnable {
 	// 取消兴趣写，写数据到信道，注册兴趣读。
 	public void run() {
 		SocketChannel channel = (SocketChannel) key.channel();
-		IOReadWork work = (IOReadWork) key.attachment();
 		try {
-			unRegisterWrite();
-			ByteBuffer buffer = work.getBuffer();
+			// unRegisterWrite();
+			ByteBuffer buffer = poller.getData(key);
 			buffer.flip();
 			channel.write(buffer);
 			poller.registerRead(key);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * 取消兴趣写
-	 */
-	void unRegisterWrite() {
-		key.interestOps(key.interestOps() ^ SelectionKey.OP_WRITE);
 	}
 }
