@@ -24,6 +24,8 @@ SelectionKey  就绪事件
 Channel  读就绪  （SelectionKey.OP_READ） 写就绪（SelectionKey.OP_WRITE） 接受就绪（SelectionKey.OP_CONNECT） 连接就绪（SelectionKey.OP_ACCEPT）
 
 如果SelectionKey中的就绪事件没有被Channel消费掉，则Selector的选择操作立即返回。selector依然认为某一通道有事件到达。
+
+注意：写事件注册时机。应用层数据已经准备完善，可以向通道中发送时，对SocketChannel进行写事件的注册。
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Buffer、状态标识（position，limit，capacity）
 写模式：向Buffer中填充/写入数据。

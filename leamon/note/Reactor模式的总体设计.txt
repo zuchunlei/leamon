@@ -5,7 +5,7 @@ Poller：轮询对象，处理SocketChannel的I/O事件。一般设计为多个，每一个Poller持有一
 Event：统一的事件模型，一般由SelectionKey的attachment所引用着。
 IOChannel：对源生NIO的Channel进行封装，内部含有事件等信息。
 
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 问：Acceptor与Poller之间如何传递SocketChannel？
 答：Acceptor主要负责对“接收就绪”的事件进行消费。
@@ -18,4 +18,14 @@ IOChannel：对源生NIO的Channel进行封装，内部含有事件等信息。
 	
 	Acceptor中通过一定的策略从pools中选中一个Poller，将SocketChannel注册到该Poller上。
 	该处使用生产者与消费者模式，事件线Events Line来解决该问题。一般情况下，事件线是一个并发的队列(J.U.C)。
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
+问：各信道事件的注册时机？
+答：ServerSocketChannel一般在系统中只存在一份，在系统启动时由Acceptor注册OP_ACCEPT事件到Acceptor内的Selector上。
+	ServerSocketChannel.accept()调用返回的SocketChannel对象，Acceptor将随机选择Poller，
+	由Poller将该SocketChannel注册OP_READ事件到当前Poller内的Selector上。
+	
+	引申，Acceptor与Poller如何传递由ServerSocketChannel.accept()返回的SocketChannel对象。
+	典型的生产者消费者模式，使用队列进行对SocketChannel对象的传递。
+	
+	SocketChannel接下来的读写事件，都由该Poller来具体负责。
