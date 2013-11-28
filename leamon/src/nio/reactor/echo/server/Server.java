@@ -7,6 +7,8 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -17,19 +19,22 @@ public class Server {
 
 	private String host;
 	private int port;
-	private int pcount;// Poller的个数
 
 	private AtomicInteger incr;// 计数器
-
 	private volatile boolean running;
 
 	private Poller[] pollers;// 轮询对象，处理SocketChannel的I/O事件
+	private Executor executor;
 
 	public Server(String host, int port) {
 		this.host = host;
 		this.port = port;
-		this.pcount = Runtime.getRuntime().availableProcessors();
 		this.incr = new AtomicInteger(Integer.MIN_VALUE);
+		this.pollers = new Poller[Runtime.getRuntime().availableProcessors() + 1];// Poller的个数为当前可以CPU+1
+		for (int i = 0; i < pollers.length; i++) {
+			pollers[i] = new Poller();
+		}
+		this.executor = Executors.newFixedThreadPool(2);
 	}
 
 	/**
@@ -75,7 +80,6 @@ public class Server {
 		private ConcurrentLinkedQueue<SelectionKey> writekeys;// 写就绪选择键集合
 
 		private AtomicBoolean wakeup;// 唤醒标识，原子类，排他。
-
 		private Selector selector;
 
 		public Poller() {
@@ -101,10 +105,14 @@ public class Server {
 							SelectionKey key = it.next();
 							it.remove();
 							if (key.isValid() && key.isReadable()) {// 处理读就绪事件
-
+								// 读数据，取消兴趣读，业务处理，注册兴趣写。
+								IOReadWork work = new IOReadWork(this, key);
+								key.attach(work);
+								executor.execute(work);
 							}
 							if (key.isValid() && key.isWritable()) {// 处理写就绪事件
-
+								IOWriteWork work = new IOWriteWork(this, key);
+								executor.execute(work);
 							}
 						}
 					}
@@ -216,7 +224,15 @@ public class Server {
 
 	public boolean start() {
 		running = true;
-		return false;
+		// 启动Poller
+		for (int i = 0; i < pollers.length; i++) {
+			String name = "Poller Thread -" + i;
+			new Thread(pollers[i], name).start();
+		}
+		// 启动Acceptor
+		new Thread(new Acceptor(), "Acceptor Thread").start();
+
+		return running;
 	}
 
 	public void stop() {
