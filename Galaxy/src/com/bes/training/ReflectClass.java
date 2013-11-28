@@ -10,7 +10,6 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 
 public class ReflectClass {
-	private String className; // 类名
 	private String clazzName; // 类全名
 	private int id; // 属性id
 	private String name; // 属性name
@@ -32,7 +31,7 @@ public class ReflectClass {
 		Iterator<?> iter = list.iterator();
 		while (iter.hasNext()) {
 			Element e = (Element) iter.next();
-			className = e.getAttributeValue("id");
+			e.getAttributeValue("id");
 			clazzName = e.getAttributeValue("class");
 			id = Integer.parseInt(e.getChildText("id"));
 			name = e.getChildText(name);
