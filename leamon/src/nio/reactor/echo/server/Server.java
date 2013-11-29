@@ -25,13 +25,14 @@ public class Server {
 	private volatile boolean running;
 
 	private Poller[] pollers;// 轮询对象，处理SocketChannel的I/O事件
-	private AtomicBoolean accept;// 连接请求被接收的标识
+
+	// private AtomicBoolean accept;// 连接请求被接收的标识
 
 	public Server(String host, int port) {
 		this.host = host;
 		this.port = port;
 		this.incr = new AtomicInteger(Integer.MIN_VALUE);
-		this.accept = new AtomicBoolean();
+		// this.accept = new AtomicBoolean();
 		this.pollers = new Poller[Runtime.getRuntime().availableProcessors() + 1];// Poller的个数为当前可以CPU+1
 		for (int i = 0; i < pollers.length; i++) {
 			pollers[i] = new Poller();
@@ -66,13 +67,18 @@ public class Server {
 								key.channel().close();
 								break;
 							}
-							// 策略选择一个Poller将该key注册到Poller上。
-							int offset = Math.abs(incr.decrementAndGet()
-									% pollers.length);
-							pollers[offset].registerChannel(key);
 
-							while (!accept.compareAndSet(true, false))
-								;
+							// OP_ACCEPT就绪事件应该由Acceptor来消费，accept()返回的SocketChannel交与Poller来处理。
+							SocketChannel channel = accept(key);
+							// 策略选择一个Poller将该key注册到Poller上。
+							// int offset = Math.abs(incr.decrementAndGet()
+							// % pollers.length);
+
+							pollers[Math.abs(incr.decrementAndGet()
+									% pollers.length)].registerChannel(channel);
+
+							// while (!accept.compareAndSet(true, false))
+							// ;
 						}
 					}
 				}
@@ -80,14 +86,31 @@ public class Server {
 				e.printStackTrace();
 			}
 		}
+
+		/**
+		 * 由Acceptor来处理OP_ACCEPT就绪事件
+		 */
+		SocketChannel accept(SelectionKey key) throws IOException {
+			SocketChannel channel = null;
+			if (key.isAcceptable()) {
+				ServerSocketChannel servSockChannel = (ServerSocketChannel) key
+						.channel();
+				channel = servSockChannel.accept();
+			}
+			return channel;
+		}
 	}
 
 	/**
-	 * @author a
-	 * 
+	 * IO轮询对象，处理SocketChannel的I/O事件。
 	 */
 	class Poller implements Runnable {
-		private ConcurrentLinkedQueue<SelectionKey> channels;// 等待注册到Poller中的SelectionKey
+		// private ConcurrentLinkedQueue<SelectionKey> channels;//
+		// 等待注册到Poller中的SelectionKey
+
+		// 等待注册到Poller中的SocketChannel，该Channel由ServerSocketChannel.accept()返回，与Selector没有注册关系
+		private ConcurrentLinkedQueue<SocketChannel> channels;
+
 		private ConcurrentLinkedQueue<SelectionKey> readkeys;// 读就绪选择键集合
 		private ConcurrentLinkedQueue<SelectionKey> writekeys;// 写就绪选择键集合
 
@@ -101,7 +124,9 @@ public class Server {
 		private Executor executor;// 具体IO执行的线程池
 
 		public Poller() {
-			this.channels = new ConcurrentLinkedQueue<SelectionKey>();
+			// this.channels = new ConcurrentLinkedQueue<SelectionKey>();
+			this.channels = new ConcurrentLinkedQueue<SocketChannel>();
+
 			this.readkeys = new ConcurrentLinkedQueue<SelectionKey>();
 			this.writekeys = new ConcurrentLinkedQueue<SelectionKey>();
 			// this.datapools = new ConcurrentHashMap<SelectionKey,
@@ -150,29 +175,32 @@ public class Server {
 		/**
 		 * 内部统一注册信道的事件
 		 */
+		@SuppressWarnings("resource")
 		void interRegisterEvent() {
 			// 注册信道的接收事件
-			SelectionKey key = channels.poll();
-			while (key != null) {
+			SocketChannel channel = channels.poll();
+			while (channel != null) {
 				try {
-					if (key.isValid() && key.isAcceptable()) {
-						ServerSocketChannel servSockChannel = (ServerSocketChannel) key
-								.channel();
-						SocketChannel channel = servSockChannel.accept();
-						while (!accept.compareAndSet(false, true))
-							;
+					// if (key.isValid() && key.isAcceptable()) {
+					// ServerSocketChannel servSockChannel =
+					// (ServerSocketChannel) key
+					// .channel();
+					// SocketChannel channel = servSockChannel.accept();
+					// // while (!accept.compareAndSet(false, true))
+					// // ;
 
-						channel.configureBlocking(false);// 必须将信道配置为非阻塞模式
-						channel.register(selector, SelectionKey.OP_READ);
-					} else {
-						key.cancel();
-					}
+					channel.configureBlocking(false);// 必须将信道配置为非阻塞模式
+					channel.register(selector, SelectionKey.OP_READ);
+					// } else {
+					// key.cancel();
+					// }
 				} catch (IOException e) {
 				}
-				key = channels.poll();
+				channel = channels.poll();
 			}
+
 			// 注册信道的读就绪事件
-			key = readkeys.poll();
+			SelectionKey key = readkeys.poll();
 			while (key != null) {
 				try {
 					if (!key.isValid()) {
@@ -212,13 +240,20 @@ public class Server {
 			wakeup.set(false);
 		}
 
+		// void registerChannel(SelectionKey key) {
+		// channels.offer(key);
+		// if (wakeup.compareAndSet(false, true)) {
+		// selector.wakeup();
+		// }
+		// }
 		/**
 		 * 注册信道的接收事件
 		 * 
-		 * @param key
+		 * @param channel
+		 *            等待注册的SocketChannel
 		 */
-		void registerChannel(SelectionKey key) {
-			channels.offer(key);
+		void registerChannel(SocketChannel channel) {
+			channels.offer(channel);
 			if (wakeup.compareAndSet(false, true)) {
 				selector.wakeup();
 			}
