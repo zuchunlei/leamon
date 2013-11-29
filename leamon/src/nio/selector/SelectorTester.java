@@ -92,7 +92,7 @@ public class SelectorTester {
 						channel.close();
 						return;
 					}
-					// key.attach(buffer);跨选择周期的选择键附件丢失
+					key.attach(buffer);// 跨选择周期的选择键附件丢失
 					dataMap.put(key, buffer);
 					// channel.register(selector, SelectionKey.OP_WRITE);
 					key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);// 注册兴趣写
@@ -101,7 +101,11 @@ public class SelectorTester {
 					key.interestOps(key.interestOps() ^ SelectionKey.OP_WRITE);// 取消关注兴趣写
 
 					// 跨选择周期的选择键附件丢失
-					// ByteBuffer buffer = (ByteBuffer) key.attachment();
+					// （不是NIO的问题，而是由于fastdebug版本的JDK的原因）
+					// （后经验证，fastdebug版的JDK完全造成该现象产生的愿意）
+					ByteBuffer attachment = (ByteBuffer) key.attachment();
+					System.out.println(attachment != null);
+
 					SocketChannel channel = (SocketChannel) key.channel();
 					ByteBuffer buffer = dataMap.get(key);
 					buffer.flip();
