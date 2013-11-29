@@ -12,4 +12,6 @@ Channel.register()方式会使原来的SelectionKey的附件丢失，而SelectionKey.interestO
 所以：如果Channel已经与Selector存在注册关系SelectionKey，则该Channel的所有改变关注兴趣的操作都应该使用SelectionKey.interestOps()方式来处理！！
 ###########################################################################################################################################################
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 现象：Reactor模式下的OP_ACCEPT就绪事件没有被Poller消费掉之前，Acceptor在一下选择周期中，仍然存在该SelectionKey？
+OP_ACCEPT就绪事件应该由Acceptor来消费，accept()返回的SocketChannel交与Poller来处理。（通用解决方案）
