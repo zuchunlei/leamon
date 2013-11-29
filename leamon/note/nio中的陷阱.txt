@@ -1,1 +1,15 @@
-不同的选择周期中，SelectionKey的附件将丢失？
+现象：不同的选择周期中，SelectionKey的附件将丢失？
+原来是fastdebug版本的JDK使该功能的缺失，完全没有SelectionKey附件丢失的情况发送。（后经证实，完全不是该因素引起）。
+
+###########################################################################################################################################################
+特别注意：Channel.register(selector, OP*)注册方式兴趣关注与SelectionKey.interestOps(OP*)的不同？
+
+如果该Channel是由ServerSocketChannel.accept()返回的，还没有与Selector有注册关系，则必须才用Channel.register()方式来注册。
+如果Channel与Selector已经存在注册关系，如果想改变其关注的兴趣事件，应采用SelectionKey.interestOps()方式来注册。
+两者的异同：
+Channel.register()方式会使原来的SelectionKey的附件丢失，而SelectionKey.interestOps()方式则不会。
+
+所以：如果Channel已经与Selector存在注册关系SelectionKey，则该Channel的所有改变关注兴趣的操作都应该使用SelectionKey.interestOps()方式来处理！！
+###########################################################################################################################################################
+
+现象：Reactor模式下的OP_ACCEPT就绪事件没有被Poller消费掉之前，Acceptor在一下选择周期中，仍然存在该SelectionKey？
