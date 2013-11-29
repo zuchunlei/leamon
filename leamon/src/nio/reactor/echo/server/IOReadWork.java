@@ -28,10 +28,11 @@ public class IOReadWork implements Runnable {
 			if (channel.read(buffer) == -1) {
 				key.cancel();
 				key.channel().close();
-				return ;
+				return;
 			}
 			// unRegisterRead();
-			poller.putData(key, buffer);
+			// poller.putData(key, buffer);
+			key.attach(buffer);// 将缓冲区以SelectionKey附件的方式挂载
 			poller.registerWrite(key);
 		} catch (IOException e) {
 		}

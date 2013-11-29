@@ -2,13 +2,11 @@ package nio.reactor.echo.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -93,7 +91,9 @@ public class Server {
 		private ConcurrentLinkedQueue<SelectionKey> readkeys;// 读就绪选择键集合
 		private ConcurrentLinkedQueue<SelectionKey> writekeys;// 写就绪选择键集合
 
-		private ConcurrentHashMap<SelectionKey, ByteBuffer> datapools;// 读写通道的数据池
+		// 去掉读写数据池，原来基于SelectionKey作为Key来保存读写的数据Map，改为使用SelectionKey附件的方式传递。
+		// private ConcurrentHashMap<SelectionKey, ByteBuffer> datapools;//
+		// 读写通道的数据池
 
 		private AtomicBoolean wakeup;// 唤醒标识，原子类，排他。
 		private Selector selector;
@@ -104,7 +104,8 @@ public class Server {
 			this.channels = new ConcurrentLinkedQueue<SelectionKey>();
 			this.readkeys = new ConcurrentLinkedQueue<SelectionKey>();
 			this.writekeys = new ConcurrentLinkedQueue<SelectionKey>();
-			this.datapools = new ConcurrentHashMap<SelectionKey, ByteBuffer>();
+			// this.datapools = new ConcurrentHashMap<SelectionKey,
+			// ByteBuffer>();
 
 			this.wakeup = new AtomicBoolean();// 默认为false
 
@@ -178,9 +179,11 @@ public class Server {
 						key.cancel();
 						key.channel().close();
 					}
-					SocketChannel channel = (SocketChannel) key.channel();
-					channel.register(selector, key.interestOps()
-							| SelectionKey.OP_READ);
+					// SocketChannel channel = (SocketChannel) key.channel();
+					// SelectionKey sk = channel.register(selector,
+					// key.interestOps() | SelectionKey.OP_READ);
+					// System.out.println(sk.attachment() != null);
+					key.interestOps(key.interestOps() | SelectionKey.OP_READ);
 				} catch (IOException e) {
 				}
 				key = readkeys.poll();
@@ -193,9 +196,13 @@ public class Server {
 						key.cancel();
 						key.channel().close();
 					}
-					SocketChannel channel = (SocketChannel) key.channel();
-					channel.register(selector, key.interestOps()
-							| SelectionKey.OP_WRITE);
+					// 以Channel的方式重新注册，产生的Key是否对附件有影响？
+					// SocketChannel channel = (SocketChannel) key.channel();
+					// SelectionKey sk = channel.register(selector,
+					// key.interestOps() | SelectionKey.OP_WRITE);
+					// System.out.println(sk.attachment() != null);
+					key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+					// System.out.println(key.attachment() != null);
 				} catch (IOException e) {
 				}
 				key = writekeys.poll();
@@ -265,9 +272,9 @@ public class Server {
 		 * @param key
 		 * @param buffer
 		 */
-		void putData(SelectionKey key, ByteBuffer buffer) {
-			datapools.put(key, buffer);
-		}
+		// void putData(SelectionKey key, ByteBuffer buffer) {
+		// datapools.put(key, buffer);
+		// }
 
 		/**
 		 * 通过Key来获取数据
@@ -275,9 +282,9 @@ public class Server {
 		 * @param key
 		 * @return
 		 */
-		ByteBuffer getData(SelectionKey key) {
-			return datapools.get(key);
-		}
+		// ByteBuffer getData(SelectionKey key) {
+		// return datapools.get(key);
+		// }
 	}
 
 	public String getHost() {

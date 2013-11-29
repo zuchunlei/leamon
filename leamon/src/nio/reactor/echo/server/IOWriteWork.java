@@ -24,7 +24,8 @@ public class IOWriteWork implements Runnable {
 		SocketChannel channel = (SocketChannel) key.channel();
 		try {
 			// unRegisterWrite();
-			ByteBuffer buffer = poller.getData(key);
+			// ByteBuffer buffer = poller.getData(key);
+			ByteBuffer buffer = (ByteBuffer) key.attachment();// 以附件的方式获取读写缓冲区
 			buffer.flip();
 			channel.write(buffer);
 			poller.registerRead(key);
