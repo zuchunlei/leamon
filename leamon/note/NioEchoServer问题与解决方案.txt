@@ -1,0 +1,11 @@
+* 使用原子变量保证同一个OP_ACCEPT事件只被一个Poller注册上，该需求将在后续版本中采用其他方式来处理。
+# OP_ACCEPT就绪事件应该由Acceptor来消费，不应该由Poller来消费。accept()返回的SocketChannel策略传递给一个Poller进行处理。
+
+* 使用取消关注兴趣点的方式来保证同一就绪事件被消费一次，否则将在Selector的下一选择周期中，该事件依然存在与SelectedKey中。
+# SelectionKey中包含OP_READ的就绪事件，则应该在消费之前取消对OP_READ的关注，否则会该就绪事件会出现在下一选择周期中。
+# 具体方式为key.interestOps(key.interestOps() | SelectionKey.OP_READ)来取消对OP_READ的关注。
+
+* 就在不同选择周期中，SelectionKey的附件将丢失的问题。采用Map来传递读写的数据。
+# 如果该Channel是由ServerSocketChannel.accept()返回的，还没有与Selector有注册关系，则必须才用Channel.register()方式来注册。
+# 如果Channel已经与Selector存在注册关系SelectionKey，则该Channel的所有改变关注兴趣的操作都应该使用SelectionKey.interestOps()方式来处理！！
+# Channel.register()方式会使原来的SelectionKey的附件丢失，而SelectionKey.interestOps()方式则不会。
