@@ -24,17 +24,19 @@ class EchoServer(object):
         # self.stop()
 
     def handle(self, connection):
-        try:
-            data = connection.recv(self._size)
-        except IOError, e:
-            print '%s ,' % e
-        connection.send(data)
-        print '%s , %d' % (data, len(data))
+        while True:
+            try:
+                data = connection.recv(self._size)
+            except IOError, e:
+                print '%s ' % e
+            if data == 'bye':
+                break
+            print 'data is %s,and len is %d' % (data, len(data))
+            connection.send(data)
         connection.close()
 
     def stop(self):
         self._sock.close()
-
 
 if __name__ == "__main__":
     server = EchoServer()
