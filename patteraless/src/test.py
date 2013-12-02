@@ -9,7 +9,7 @@ from socket import *
 
 class Connection(object):
     """ this is class Connection """
-    
+
     def __init__(self, host, port):
         sock = socket(host, port)
         self.__sock = sock

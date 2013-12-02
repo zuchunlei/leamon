@@ -6,4 +6,4 @@
 
 
 class D(object):
-	pass
+    pass
