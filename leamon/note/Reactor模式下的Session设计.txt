@@ -1,0 +1,2 @@
+IOSession用来对SocketChannel的读写操作进行统一管理的对象，一般作为SelectionKey的附件进行挂载。
+保证每一个SocketChannel（代表一个网络连接）对象唯一对应（跨Selector不计在内）一个IOSession对象。
