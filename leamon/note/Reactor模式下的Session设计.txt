@@ -1,2 +1,6 @@
 IOSession用来对SocketChannel的读写操作进行统一管理的对象，一般作为SelectionKey的附件进行挂载。
 保证每一个SocketChannel（代表一个网络连接）对象唯一对应（跨Selector不计在内）一个IOSession对象。
+
+Session本意会话，是在网络连接上一层的抽象，Session内部一般都维护一些通讯的状态，典型的如HttpSession。
+
+特别声明：一般事务相关的功能全部依附与Session内。

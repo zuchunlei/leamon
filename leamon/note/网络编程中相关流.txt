@@ -19,10 +19,30 @@ java中的流具有鲜明的特点。单向传输，传输单元为字节。（输入，输出由不同的类负责）
 	缓冲流：BufferedInputStream/BufferedOutputStream
 	数据流：DataInputStream/DataOutputStream
 	对象流：ObjectInputStream/ObjectOutputStream
-	压缩流：
-	摘要流：
-	加密流：
+	压缩流：GzipInputStream/GzipOutputStream 、ZipInputStream/ZipOutputStream
+	摘要流：DigestInputStream/DigestOutputStream （security包下）
+	加密流：CipherInputStream/CipherOutputStream （javax扩展）
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 问题1：ObjectInputStream的构造细节。
-
+ 	public ObjectInputStream(InputStream in) throws IOException {
+		verifySubclass();
+		bin = new BlockDataInputStream(in);
+		handles = new HandleTable(10);
+		vlist = new ValidationList();
+		enableOverride = false;
+		readStreamHeader();
+		bin.setBlockDataMode(true);
+    }
+	在ObjectInputStream的构造方法中，存在readStreamHeader()的方法调用，
+	protected void readStreamHeader() throws IOException, StreamCorruptedException {
+		short s0 = bin.readShort(); // bin为原始流
+		short s1 = bin.readShort();
+		if (s0 != STREAM_MAGIC || s1 != STREAM_VERSION) {
+		    throw new StreamCorruptedException(
+			String.format("invalid stream header: %04X%04X", s0, s1));
+		}
+    }
+	在readStreamHeader()方法调用时，会对原始流进行两次的readShort操作，也就是要对原始流读前4个字节，
+	这就要求原始流此时必须可用，否者readShort调用将阻塞，构造无法返回。
+	注：如果原始流为socket.getInputStream()返回的网络流，如果该input流并没有数据准备好，则会出现阻塞的状态。
