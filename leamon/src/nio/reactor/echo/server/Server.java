@@ -120,7 +120,6 @@ public class Server {
 
 		private AtomicBoolean wakeup;// 唤醒标识，原子类，排他。
 		private Selector selector;
-
 		private Executor executor;// 具体IO执行的线程池
 
 		public Poller() {
@@ -141,6 +140,14 @@ public class Server {
 			this.executor = Executors.newCachedThreadPool();
 		}
 
+		public Selector getSelector() {
+			return selector;
+		}
+
+		public Executor getExecutor() {
+			return executor;
+		}
+
 		public void run() {
 			while (running) {
 				try {
@@ -153,16 +160,32 @@ public class Server {
 							SelectionKey key = it.next();
 							it.remove();
 							if (key.isValid() && key.isReadable()) {// 处理读就绪事件
+								// 创建IOSession对象，该对象内部封装了具体的IO读写逻辑，以及业务处理的逻辑。
+								IOSession session = (IOSession) key
+										.attachment();
+								if (session == null) {
+									session = new IOSession(key, this);
+									key.attach(session);
+								}
 								// 取消兴趣读，读数据，业务处理，注册兴趣写。
 								unRegisterRead(key);// 取消所有兴趣关注点
-								IOReadWork work = new IOReadWork(this, key);
-								executor.execute(work);
+
+								// IOReadWork work = new IOReadWork(this, key);
+								// executor.execute(work);
+
+								// session对象具体处理数据读写的逻辑
+								session.readData();
 							}
 							if (key.isValid() && key.isWritable()) {// 处理写就绪事件
 								// 取消兴趣写
 								unRegisterWrite(key);
-								IOWriteWork work = new IOWriteWork(this, key);
-								executor.execute(work);
+								// IOWriteWork work = new IOWriteWork(this,
+								// key);
+								// executor.execute(work);
+								
+								IOSession session = (IOSession) key
+										.attachment();
+								session.writeData();
 							}
 						}
 					}
