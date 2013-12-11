@@ -102,7 +102,7 @@ public class SelectorTester {
 
 					// 跨选择周期的选择键附件丢失
 					// （不是NIO的问题，而是由于fastdebug版本的JDK的原因）
-					// （后经验证，fastdebug版的JDK完全造成该现象产生的愿意）
+					// （后经验证，fastdebug版的JDK完全不是造成该现象发生的原因）
 					ByteBuffer attachment = (ByteBuffer) key.attachment();
 					System.out.println(attachment != null);
 
@@ -111,6 +111,7 @@ public class SelectorTester {
 					buffer.flip();
 					// write消费了“写就绪”事件
 					channel.write(buffer);
+					// 如果channel已经与selector存在了注册关系，则该channel所有的兴趣更改都应该由key来改变。
 					key.interestOps(key.interestOps() | SelectionKey.OP_READ);// 重新注册兴趣读
 					selector.wakeup();
 				}
