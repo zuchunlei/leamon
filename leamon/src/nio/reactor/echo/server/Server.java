@@ -109,14 +109,16 @@ public class Server {
 		// 等待注册到Poller中的SelectionKey
 
 		// 等待注册到Poller中的SocketChannel，该Channel由ServerSocketChannel.accept()返回，与Selector没有注册关系
-		private ConcurrentLinkedQueue<SocketChannel> channels;
+		// private ConcurrentLinkedQueue<SocketChannel> channels;
 
-		private ConcurrentLinkedQueue<SelectionKey> readkeys;// 读就绪选择键集合
-		private ConcurrentLinkedQueue<SelectionKey> writekeys;// 写就绪选择键集合
+		// private ConcurrentLinkedQueue<SelectionKey> readkeys;// 读就绪选择键集合
+		// private ConcurrentLinkedQueue<SelectionKey> writekeys;// 写就绪选择键集合
 
 		// 去掉读写数据池，原来基于SelectionKey作为Key来保存读写的数据Map，改为使用SelectionKey附件的方式传递。
 		// private ConcurrentHashMap<SelectionKey, ByteBuffer> datapools;//
 		// 读写通道的数据池
+
+		private ConcurrentLinkedQueue<Runnable> events;// 兴趣事件注册队列，统一注册方式。
 
 		private AtomicBoolean wakeup;// 唤醒标识，原子类，排他。
 		private Selector selector;
@@ -124,10 +126,11 @@ public class Server {
 
 		public Poller() {
 			// this.channels = new ConcurrentLinkedQueue<SelectionKey>();
-			this.channels = new ConcurrentLinkedQueue<SocketChannel>();
-
-			this.readkeys = new ConcurrentLinkedQueue<SelectionKey>();
-			this.writekeys = new ConcurrentLinkedQueue<SelectionKey>();
+			// this.channels = new ConcurrentLinkedQueue<SocketChannel>();
+			//
+			// this.readkeys = new ConcurrentLinkedQueue<SelectionKey>();
+			// this.writekeys = new ConcurrentLinkedQueue<SelectionKey>();
+			this.events = new ConcurrentLinkedQueue<Runnable>();
 			// this.datapools = new ConcurrentHashMap<SelectionKey,
 			// ByteBuffer>();
 
@@ -182,7 +185,7 @@ public class Server {
 								// IOWriteWork work = new IOWriteWork(this,
 								// key);
 								// executor.execute(work);
-								
+
 								IOSession session = (IOSession) key
 										.attachment();
 								session.writeData();
@@ -198,65 +201,71 @@ public class Server {
 		/**
 		 * 内部统一注册信道的事件
 		 */
-		@SuppressWarnings("resource")
 		void interRegisterEvent() {
 			// 注册信道的接收事件
-			SocketChannel channel = channels.poll();
-			while (channel != null) {
-				try {
-					// if (key.isValid() && key.isAcceptable()) {
-					// ServerSocketChannel servSockChannel =
-					// (ServerSocketChannel) key
-					// .channel();
-					// SocketChannel channel = servSockChannel.accept();
-					// // while (!accept.compareAndSet(false, true))
-					// // ;
+			// SocketChannel channel = channels.poll();
+			// while (channel != null) {
+			// try {
+			// // if (key.isValid() && key.isAcceptable()) {
+			// // ServerSocketChannel servSockChannel =
+			// // (ServerSocketChannel) key
+			// // .channel();
+			// // SocketChannel channel = servSockChannel.accept();
+			// // // while (!accept.compareAndSet(false, true))
+			// // // ;
+			//
+			// channel.configureBlocking(false);// 必须将信道配置为非阻塞模式
+			// channel.register(selector, SelectionKey.OP_READ);
+			// // } else {
+			// // key.cancel();
+			// // }
+			// } catch (IOException e) {
+			// }
+			// channel = channels.poll();
+			// }
+			//
+			// // 注册信道的读就绪事件
+			// SelectionKey key = readkeys.poll();
+			// while (key != null) {
+			// try {
+			// if (!key.isValid()) {
+			// key.cancel();
+			// key.channel().close();
+			// }
+			// // SocketChannel channel = (SocketChannel) key.channel();
+			// // SelectionKey sk = channel.register(selector,
+			// // key.interestOps() | SelectionKey.OP_READ);
+			// // System.out.println(sk.attachment() != null);
+			// key.interestOps(key.interestOps() | SelectionKey.OP_READ);
+			// } catch (IOException e) {
+			// }
+			// key = readkeys.poll();
+			// }
+			// // 注册信道的写就绪事件
+			// key = writekeys.poll();
+			// while (key != null) {
+			// try {
+			// if (!key.isValid()) {
+			// key.cancel();
+			// key.channel().close();
+			// }
+			// // 以Channel的方式重新注册，产生的Key是否对附件有影响？
+			// // SocketChannel channel = (SocketChannel) key.channel();
+			// // SelectionKey sk = channel.register(selector,
+			// // key.interestOps() | SelectionKey.OP_WRITE);
+			// // System.out.println(sk.attachment() != null);
+			// key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+			// // System.out.println(key.attachment() != null);
+			// } catch (IOException e) {
+			// }
+			// key = writekeys.poll();
+			// }
 
-					channel.configureBlocking(false);// 必须将信道配置为非阻塞模式
-					channel.register(selector, SelectionKey.OP_READ);
-					// } else {
-					// key.cancel();
-					// }
-				} catch (IOException e) {
-				}
-				channel = channels.poll();
-			}
-
-			// 注册信道的读就绪事件
-			SelectionKey key = readkeys.poll();
-			while (key != null) {
-				try {
-					if (!key.isValid()) {
-						key.cancel();
-						key.channel().close();
-					}
-					// SocketChannel channel = (SocketChannel) key.channel();
-					// SelectionKey sk = channel.register(selector,
-					// key.interestOps() | SelectionKey.OP_READ);
-					// System.out.println(sk.attachment() != null);
-					key.interestOps(key.interestOps() | SelectionKey.OP_READ);
-				} catch (IOException e) {
-				}
-				key = readkeys.poll();
-			}
-			// 注册信道的写就绪事件
-			key = writekeys.poll();
-			while (key != null) {
-				try {
-					if (!key.isValid()) {
-						key.cancel();
-						key.channel().close();
-					}
-					// 以Channel的方式重新注册，产生的Key是否对附件有影响？
-					// SocketChannel channel = (SocketChannel) key.channel();
-					// SelectionKey sk = channel.register(selector,
-					// key.interestOps() | SelectionKey.OP_WRITE);
-					// System.out.println(sk.attachment() != null);
-					key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
-					// System.out.println(key.attachment() != null);
-				} catch (IOException e) {
-				}
-				key = writekeys.poll();
+			// 采用统一的注册事件的方式来处理
+			for (Iterator<Runnable> it = events.iterator(); it.hasNext();) {
+				Runnable task = it.next();
+				it.remove();// 显式删除注册事件
+				task.run();
 			}
 
 			// 重置唤醒标识
@@ -276,7 +285,19 @@ public class Server {
 		 *            等待注册的SocketChannel
 		 */
 		void registerChannel(SocketChannel channel) {
-			channels.offer(channel);
+			// channels.offer(channel);
+			final SocketChannel sc = channel;
+			events.add(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						sc.configureBlocking(false);
+						sc.register(selector, SelectionKey.OP_READ);
+					} catch (IOException e) {
+						// ignore
+					}
+				}
+			});
 			if (wakeup.compareAndSet(false, true)) {
 				selector.wakeup();
 			}
@@ -288,7 +309,22 @@ public class Server {
 		 * @param key
 		 */
 		void registerRead(SelectionKey key) {
-			readkeys.offer(key);
+			// readkeys.offer(key);
+			final SelectionKey sk = key;
+			events.add(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						if (!sk.isValid()) {
+							sk.cancel();
+							sk.channel().close();
+						}
+						sk.interestOps(sk.interestOps() | SelectionKey.OP_READ);
+					} catch (IOException e) {
+						// ignore
+					}
+				}
+			});
 			if (wakeup.compareAndSet(false, true)) {
 				selector.wakeup();
 			}
@@ -300,7 +336,22 @@ public class Server {
 		 * @param key
 		 */
 		void registerWrite(SelectionKey key) {
-			writekeys.offer(key);
+			// writekeys.offer(key);
+			final SelectionKey sk = key;
+			events.add(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						if (!sk.isValid()) {
+							sk.cancel();
+							sk.channel().close();
+						}
+						sk.interestOps(sk.interestOps() | SelectionKey.OP_WRITE);
+					} catch (IOException e) {
+						// ignore
+					}
+				}
+			});
 			if (wakeup.compareAndSet(false, true)) {
 				selector.wakeup();
 			}
