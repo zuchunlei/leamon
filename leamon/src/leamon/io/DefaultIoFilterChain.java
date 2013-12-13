@@ -1,0 +1,61 @@
+package leamon.io;
+
+public class DefaultIoFilterChain implements IoFilterChain {
+	private static final int DEFAULT_CHAIN_SIZE = 10;
+
+	private IoFilter[] chain;
+	private IoHandler handler;// io处理器
+
+	private int counter;
+	private int index;// 调用时计数器
+
+	public DefaultIoFilterChain() {
+		this(DEFAULT_CHAIN_SIZE, null);
+	}
+
+	public DefaultIoFilterChain(int size) {
+		this(size, null);
+	}
+
+	public DefaultIoFilterChain(int size, IoHandler handler) {
+		this.chain = new IoFilter[size];
+		this.handler = handler;
+		this.counter = 0;
+	}
+
+	public void setHandler(IoHandler handler) {
+		this.handler = handler;
+	}
+
+	@Override
+	public Object doFilter() {
+		if (index < counter) {
+			chain[index++].doFilter(this);
+		}
+		handler.handle();
+		return null;
+	}
+
+	@Override
+	public void addFilter(IoFilter filter) {
+		if (counter == chain.length) {
+			IoFilter[] newChain = new IoFilter[counter + 10];
+			System.arraycopy(chain, 0, newChain, 0, counter);
+			chain = newChain;
+		}
+		chain[counter++] = filter;
+	}
+
+	@Override
+	public void removeFilter(IoFilter filter) {
+		IoFilter[] newChain = new IoFilter[chain.length];
+		for (int i = 0, j = 0, len = counter; i < len; i++) {
+			if (chain[j].equals(filter)) {
+				counter--;
+			} else {
+				newChain[j++] = chain[i];
+			}
+		}
+		chain = newChain;
+	}
+}
