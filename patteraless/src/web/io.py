@@ -26,8 +26,9 @@ class FilterChain(object):
             filter_obj = self.chain[self.index]
             self.index += 1
             filter_obj.do_filter()
-        else:
-            self.handler.handle()
+            return
+
+        self.handler.handle()
 
 
 class Filter(object):
@@ -63,15 +64,22 @@ class Handler(object):
     处理器
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, host, port=80):
+        self.address = (host, port)
 
     def handle(self):
+        import socket
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect(self.address)
+        sock.send('bye !')
+        sock.close()
+
         print "处理器开始执行"
 
 
 if __name__ == '__main__':
-    filterChain = FilterChain(Handler())
+    filterChain = FilterChain(Handler('163.com'))
 
     for i in xrange(4):
         filterChain.add_filter(Filter(filterChain))
