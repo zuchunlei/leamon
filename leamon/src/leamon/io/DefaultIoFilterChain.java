@@ -18,7 +18,7 @@ public class DefaultIoFilterChain implements IoFilterChain {
 	}
 
 	public DefaultIoFilterChain(int size, IoHandler handler) {
-		this.chain = new IoFilter[size];
+		this.chain = new IoFilter[size <= 0 ? DEFAULT_CHAIN_SIZE : size];
 		this.handler = handler;
 		this.counter = 0;
 	}
@@ -30,9 +30,13 @@ public class DefaultIoFilterChain implements IoFilterChain {
 	@Override
 	public Object doFilter() {
 		if (index < counter) {
-			chain[index++].doFilter(this);
+			IoFilter filter = chain[index++];
+			// 前置通知
+			filter.doFilter(this);
+			// 后置通知
+		} else {
+			handler.handle();
 		}
-		handler.handle();
 		return null;
 	}
 
@@ -50,7 +54,7 @@ public class DefaultIoFilterChain implements IoFilterChain {
 	public void removeFilter(IoFilter filter) {
 		IoFilter[] newChain = new IoFilter[chain.length];
 		for (int i = 0, j = 0, len = counter; i < len; i++) {
-			if (chain[j].equals(filter)) {
+			if (chain[i].equals(filter)) {
 				counter--;
 			} else {
 				newChain[j++] = chain[i];
