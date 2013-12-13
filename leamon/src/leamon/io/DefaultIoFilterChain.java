@@ -34,9 +34,9 @@ public class DefaultIoFilterChain implements IoFilterChain {
 			// 前置通知
 			filter.doFilter(this);
 			// 后置通知
-		} else {
-			handler.handle();
+			return null;
 		}
+		handler.handle();
 		return null;
 	}
 
