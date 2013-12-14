@@ -1,7 +1,12 @@
-socket receive buffer
+Socket选项之so_rcvbuf，so_sndbuf
+ServerSocket.setReceiveBufferSize(int size)
+Socket.setReceiveBufferSize(int size)，Socket.setSendBufferSize(int size)
 
 ServerSocket的receive buffer 设置size以后，
 所有通过ServerSocket accept返回的Socket对象的继承了ServerSocket的receiver buffer大小。
+ServerSocket只能设置setReceiveBufferSize，而没有setSendBufferSize。因为accept()返回的Socket已经具有了接收数据的能力。
+ServerSocket.setReceiveBufferSize(int size)必须在该ServerSocket对象绑定之前（bind）进行调用
+
 但是Socket对象可以在之后改变他自身的发送缓冲区(SendBuffer)大小与接受缓冲区(ReceiveBuffer)大小。
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -20,3 +25,14 @@ Socket.setKeepAlive(boolean on)
 设置Socket的so_keepalive选项。该选项只适用于TCP协议
 当设置了该选项以后，操作系统会对socket底层的tcp连接进行连接探测。默认是关闭的
 不过关于TCP的so_keepalive选项参数由操作系统网络模块进行配置，java程序无能为力。
+
+######################################################################################
+Linux关于TCP协议的so_keepalive的配置
+
+tcp_keepalive_time：当keepalive起用的时候，TCP发送keepalive消息的频度。缺省是2小时，7200秒。
+tcp_keepalive_intvl：当探测没有确认时，重新发送探测的频度。缺省是75秒。
+tcp_keepalive_probes：在认定连接失效之前，发送多少个TCP的keepalive探测包。缺省值是9。
+这个值乘以tcp_keepalive_intvl之后决定了，一个连接发送了keepalive之后可以有多少时间没有回应。
+
+可以通过sysctl系统配置与procfs文件系统中修改TCP keepalive选择的默认值
+######################################################################################
