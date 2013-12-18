@@ -3,7 +3,7 @@ package leamon.io;
 public class BaseIoService implements IoService {
 
 	private IoHandler handler;
-	private IoFilterChain filterChain;
+	private OperabilityFilterChain filterChain;
 
 	public BaseIoService() {
 		this(0, null);

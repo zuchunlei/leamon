@@ -13,6 +13,7 @@ public class DefaultIoFilter implements IoFilter {
 	@Override
 	public Object doFilter(IoFilterChain chain) {
 		System.out.println("IoFilter number is :" + number);
-		return chain.doFilter();
+		chain.doFilter();
+		return null;
 	}
 }

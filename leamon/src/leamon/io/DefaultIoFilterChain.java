@@ -1,6 +1,6 @@
 package leamon.io;
 
-public class DefaultIoFilterChain implements IoFilterChain {
+public class DefaultIoFilterChain implements OperabilityFilterChain {
 	private static final int DEFAULT_CHAIN_SIZE = 10;
 
 	private IoFilter[] chain;
@@ -28,16 +28,15 @@ public class DefaultIoFilterChain implements IoFilterChain {
 	}
 
 	@Override
-	public Object doFilter() {
+	public void doFilter() {
 		if (index < counter) {
 			IoFilter filter = chain[index++];
 			// 前置通知
 			filter.doFilter(this);
 			// 后置通知
-			return null;
+			return;
 		}
 		handler.handle();
-		return null;
 	}
 
 	@Override
