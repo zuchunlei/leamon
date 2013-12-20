@@ -1,6 +1,7 @@
 #-*- encoding:utf-8 -*-
 
 import socket
+import thread
 
 
 class EchoServer(object):
@@ -20,7 +21,9 @@ class EchoServer(object):
         """
         connection, client = self._sock.accept()
         print "host is %s and port is %d" % (client[0], client[1])
-        self.handle(connection)
+        # 采用多线程方式执行handle方法，运行多用户同时访问。
+        # self.handle(connection)
+        thread.start_new_thread(self.handle, (connection,))
         # self.stop()
 
     def handle(self, connection):
@@ -38,8 +41,9 @@ class EchoServer(object):
     def stop(self):
         self._sock.close()
 
+
 if __name__ == "__main__":
-    server = EchoServer()
+    server = EchoServer("192.168.1.90")
     while True:
         server.service()
 
