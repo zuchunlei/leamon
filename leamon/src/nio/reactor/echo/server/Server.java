@@ -7,9 +7,11 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -123,6 +125,7 @@ public class Server {
 		private AtomicBoolean wakeup;// 唤醒标识，原子类，排他。
 		private Selector selector;
 		private Executor executor;// 具体IO执行的线程池
+		private BlockingQueue<Runnable> ioevents;// IO读写事件
 
 		public Poller() {
 			// this.channels = new ConcurrentLinkedQueue<SelectionKey>();
@@ -141,6 +144,9 @@ public class Server {
 			} catch (IOException e) {
 			}
 			this.executor = Executors.newCachedThreadPool();
+			this.ioevents = new LinkedBlockingQueue<Runnable>();
+
+			handlIoEvent();// 处理IO读写事件
 		}
 
 		public Selector getSelector() {
@@ -167,7 +173,7 @@ public class Server {
 								IOSession session = (IOSession) key
 										.attachment();
 								if (session == null) {
-									session = new IOSession(key, this);
+									session = new IOSession(key);
 									key.attach(session);
 								}
 								// 取消兴趣读，读数据，业务处理，注册兴趣写。
@@ -177,7 +183,8 @@ public class Server {
 								// executor.execute(work);
 
 								// session对象具体处理数据读写的逻辑
-								session.readData();
+								// session.readData();
+								addReadEvent(session);
 							}
 							if (key.isValid() && key.isWritable()) {// 处理写就绪事件
 								// 取消兴趣写
@@ -188,7 +195,8 @@ public class Server {
 
 								IOSession session = (IOSession) key
 										.attachment();
-								session.writeData();
+								// session.writeData();
+								addWriteEvent(session);
 							}
 						}
 					}
@@ -196,6 +204,21 @@ public class Server {
 					e.printStackTrace();
 				}
 			}
+		}
+
+		/**
+		 * 内部处理IO读写事件
+		 */
+		void handlIoEvent() {
+			Runnable runner = new Runnable() {
+				@Override
+				public void run() {
+					Runnable command = ioevents.poll();// 获取并移除queue头部元素，IO task
+					executor.execute(command);
+				}
+			};
+			String name = "io events executor";
+			new Thread(runner, name).start();
 		}
 
 		/**
@@ -394,6 +417,38 @@ public class Server {
 		// ByteBuffer getData(SelectionKey key) {
 		// return datapools.get(key);
 		// }
+
+		/**
+		 * 处理IO Read事件
+		 * 
+		 * @param session
+		 */
+		void addReadEvent(final IOSession session) {
+			if (!session.isReading()) {
+				Runnable command = new Runnable() {
+					@Override
+					public void run() {
+						session.readData();
+					}
+				};
+				ioevents.add(command);
+			}
+		}
+
+		/**
+		 * 处理IO Write事件
+		 * 
+		 * @param session
+		 */
+		void addWriteEvent(final IOSession session) {
+			Runnable command = new Runnable() {
+				@Override
+				public void run() {
+					session.writeData();
+				}
+			};
+			ioevents.add(command);
+		}
 	}
 
 	public String getHost() {
