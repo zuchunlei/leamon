@@ -34,11 +34,16 @@ public class UDPDemo {
 	}
 
 	public static void main(String[] args) {
+		DatagramSocket socket = null;
 		try {
-			DatagramSocket socket1 = new DatagramSocket(1000);
-			socket1.setReuseAddress(true);
+			socket = new DatagramSocket(1000);
+			socket.setReuseAddress(true);
 		} catch (SocketException e) {
 			e.printStackTrace();
+		} finally {
+			if (socket != null) {
+				socket.close();
+			}
 		}
 	}
 }

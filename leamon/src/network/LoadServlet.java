@@ -13,7 +13,7 @@ public class LoadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected void service(HttpServletRequest arg0, HttpServletResponse arg1)
+	protected void service(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		URL url = new URL("http://baidu.com");
 		URL[] urls = new URL[] { url };
@@ -21,5 +21,4 @@ public class LoadServlet extends HttpServlet {
 		System.out.println(LoadServlet.class.getClassLoader());
 		System.out.println(loader.getParent());
 	}
-
 }

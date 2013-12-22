@@ -22,5 +22,6 @@ public class ReadEOFTester {
 
 		is.close();
 		sock.close();
+		servSock.close();
 	}
 }
