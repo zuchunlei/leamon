@@ -1,4 +1,4 @@
-package com.bes.com.bes.common.io;
+package com.bes.common.io.filter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class DefaultIoService implements IoService {
         header.doFilter();
     }
 
-    class DefaultIoHandler implements IoHandler {
+    static class DefaultIoHandler implements IoHandler {
         @Override
         public void handle() {
             System.out.println("IoHandler is invoking !");

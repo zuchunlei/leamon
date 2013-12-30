@@ -1,4 +1,4 @@
-package com.bes.com.bes.common.io;
+package com.bes.common.io.filter;
 
 public interface IoHandler {
 
