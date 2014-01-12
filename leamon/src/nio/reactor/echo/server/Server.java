@@ -386,7 +386,8 @@ public class Server {
 		 * @param key
 		 */
 		void unRegisterRead(SelectionKey key) {
-			key.interestOps(key.interestOps() ^ SelectionKey.OP_READ);
+			// key.interestOps(key.interestOps() ^ SelectionKey.OP_READ);
+			key.interestOps(key.interestOps() & ~SelectionKey.OP_READ);
 		}
 
 		/**
@@ -395,7 +396,8 @@ public class Server {
 		 * @param key
 		 */
 		void unRegisterWrite(SelectionKey key) {
-			key.interestOps(key.interestOps() ^ SelectionKey.OP_WRITE);
+			// key.interestOps(key.interestOps() ^ SelectionKey.OP_WRITE);
+			key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
 		}
 
 		/**

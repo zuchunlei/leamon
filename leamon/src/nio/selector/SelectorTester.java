@@ -95,7 +95,7 @@ public class SelectorTester {
 				 * selector.wakeup(); } else
 				 */
 				if (key.isReadable()) {
-					key.interestOps(key.interestOps() ^ SelectionKey.OP_READ);// 取消关注兴趣读
+					key.interestOps(key.interestOps() & ~SelectionKey.OP_READ);// 取消关注兴趣读
 
 					SocketChannel channel = (SocketChannel) key.channel();
 					// read消费了“读继续”事件
@@ -111,7 +111,7 @@ public class SelectorTester {
 					key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);// 注册兴趣写
 					selector.wakeup();
 				} else if (key.isWritable()) {
-					key.interestOps(key.interestOps() ^ SelectionKey.OP_WRITE);// 取消关注兴趣写
+					key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);// 取消关注兴趣写
 
 					// 跨选择周期的选择键附件丢失
 					// （不是NIO的问题，而是由于fastdebug版本的JDK的原因）
