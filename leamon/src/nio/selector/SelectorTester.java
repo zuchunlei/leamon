@@ -8,7 +8,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 测试Selector的注册通道的线程安全性。 该实现会导致无数的线程被创建。
@@ -16,12 +15,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SelectorTester {
 
-	private ConcurrentHashMap<SelectionKey, ByteBuffer> dataMap;
-
+	// private ConcurrentHashMap<SelectionKey, ByteBuffer> dataMap;
 	// private AtomicBoolean acceptLock;// 连接接受锁
 
 	public SelectorTester() {
-		this.dataMap = new ConcurrentHashMap<SelectionKey, ByteBuffer>();
+		// this.dataMap = new ConcurrentHashMap<SelectionKey, ByteBuffer>();
 		// this.acceptLock = new AtomicBoolean();// 默认为false
 	}
 
@@ -55,6 +53,8 @@ public class SelectorTester {
 					if (key.isAcceptable()) {// 连接就绪
 						// accept 消费了“接受就绪”事件
 						SocketChannel channel = servChannel.accept();
+						// 必须显式的将channel配置为非阻塞
+						channel.configureBlocking(false);
 						channel.register(selector, SelectionKey.OP_READ);// 注册读兴趣事件
 					}
 				} else {
@@ -106,7 +106,7 @@ public class SelectorTester {
 						return;
 					}
 					key.attach(buffer);// 跨选择周期的选择键附件丢失
-					dataMap.put(key, buffer);
+					// dataMap.put(key, buffer);
 					// channel.register(selector, SelectionKey.OP_WRITE);
 					key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);// 注册兴趣写
 					selector.wakeup();
@@ -116,11 +116,11 @@ public class SelectorTester {
 					// 跨选择周期的选择键附件丢失
 					// （不是NIO的问题，而是由于fastdebug版本的JDK的原因）
 					// （后经验证，fastdebug版的JDK完全不是造成该现象发生的原因）
-					ByteBuffer attachment = (ByteBuffer) key.attachment();
-					System.out.println(attachment != null);
+					ByteBuffer buffer = (ByteBuffer) key.attachment();
+					System.out.println(buffer != null);
 
 					SocketChannel channel = (SocketChannel) key.channel();
-					ByteBuffer buffer = dataMap.get(key);
+					// ByteBuffer buffer = dataMap.get(key);
 					buffer.flip();
 					// write消费了“写就绪”事件
 					channel.write(buffer);
