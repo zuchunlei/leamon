@@ -9,7 +9,6 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 测试Selector的注册通道的线程安全性。 该实现会导致无数的线程被创建。
@@ -18,11 +17,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SelectorTester {
 
 	private ConcurrentHashMap<SelectionKey, ByteBuffer> dataMap;
-	private AtomicBoolean acceptLock;// 连接接受锁
+
+	// private AtomicBoolean acceptLock;// 连接接受锁
 
 	public SelectorTester() {
 		this.dataMap = new ConcurrentHashMap<SelectionKey, ByteBuffer>();
-		this.acceptLock = new AtomicBoolean();// 默认为false
+		// this.acceptLock = new AtomicBoolean();// 默认为false
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -49,12 +49,26 @@ public class SelectorTester {
 				SelectionKey key = it.next();
 				// 必须手动删除该选择键，否则在下次选择中，该选择键依然存在。
 				it.remove();
-				new Thread(new Handler(key)).start();
-				// new Handler(key).run();
-				if (key.channel().equals(servChannel)) {// 连接就绪，使用锁来保证该事件只被消费一次
-					while (!acceptLock.compareAndSet(true, false))
-						;
+
+				if (key.channel().equals(servChannel)) {// 连接就绪到达
+					// 由主线程进行accept操作，并对返回的Channel进行注册
+					if (key.isAcceptable()) {// 连接就绪
+						// accept 消费了“接受就绪”事件
+						SocketChannel channel = servChannel.accept();
+						channel.register(selector, SelectionKey.OP_READ);// 注册读兴趣事件
+					}
+				} else {
+					// 读写事件到达，交与新线程进行处理。
+					new Thread(new Handler(key)).start();
 				}
+
+				// new Thread(new Handler(key)).start();
+				// // new Handler(key).run();
+				// if (key.channel().equals(servChannel)) {//
+				// 连接就绪，使用锁来保证该事件只被消费一次
+				// while (!acceptLock.compareAndSet(true, false))
+				// ;
+				// }
 			}
 		}
 	}
@@ -69,19 +83,18 @@ public class SelectorTester {
 		public void run() {
 			try {
 				Selector selector = key.selector();
-				if (key.isAcceptable()) {
-					ServerSocketChannel servChannel = (ServerSocketChannel) key
-							.channel();
-					// accept 消费了“接受就绪”事件
-					SocketChannel channel = servChannel.accept();
-					while (!acceptLock.compareAndSet(false, true))
-						;
-					channel.configureBlocking(false);
-					// 该channel第一次注册，如果该Selector处于select状态，则注册不成功。
-					// 因为竞争Selector实例的中publicKeys，导致channel注册阻塞。
-					channel.register(selector, SelectionKey.OP_READ);
-					selector.wakeup();
-				} else if (key.isReadable()) {
+				/*
+				 * if (key.isAcceptable()) { ServerSocketChannel servChannel =
+				 * (ServerSocketChannel) key .channel(); // accept 消费了“接受就绪”事件
+				 * SocketChannel channel = servChannel.accept(); while
+				 * (!acceptLock.compareAndSet(false, true)) ;
+				 * channel.configureBlocking(false); //
+				 * 该channel第一次注册，如果该Selector处于select状态，则注册不成功。 //
+				 * 因为竞争Selector实例的中publicKeys，导致channel注册阻塞。
+				 * channel.register(selector, SelectionKey.OP_READ);
+				 * selector.wakeup(); } else
+				 */
+				if (key.isReadable()) {
 					key.interestOps(key.interestOps() ^ SelectionKey.OP_READ);// 取消关注兴趣读
 
 					SocketChannel channel = (SocketChannel) key.channel();
