@@ -3,7 +3,10 @@
 
 * 使用取消关注兴趣点的方式来保证同一就绪事件被消费一次，否则将在Selector的下一选择周期中，该事件依然存在与SelectedKey中。
 # SelectionKey中包含OP_READ的就绪事件，则应该在消费之前取消对OP_READ的关注，否则会该就绪事件会出现在下一选择周期中。
-# 具体方式为key.interestOps(key.interestOps() | SelectionKey.OP_READ)来取消对OP_READ的关注。
+# 具体方式为key.interestOps(key.interestOps() & ~SelectionKey.OP_READ)来取消对OP_READ的关注。
+注： 取消关注兴趣点的具体调用方式？（java语言中的按位操作）
+	之前一直使用^（按位异或）操作符来改变channel的兴趣关注点，发现存在致命的问题。完全满足不了语义需求。
+	取消关注兴趣点的通用解决方案（以取消OP_READ为例）：key.interestOps(key.interestOps() & ~SelectionKey.OP_READ);
 
 * 就在不同选择周期中，SelectionKey的附件将丢失的问题。采用Map来传递读写的数据。
 # 如果该Channel是由ServerSocketChannel.accept()返回的，还没有与Selector有注册关系，则必须才用Channel.register()方式来注册。
