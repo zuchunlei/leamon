@@ -173,7 +173,7 @@ public class Server {
 								IOSession session = (IOSession) key
 										.attachment();
 								if (session == null) {
-									session = new IOSession(key);
+									session = new IOSession(key, this);
 									key.attach(session);
 								}
 								// 取消兴趣读，读数据，业务处理，注册兴趣写。
@@ -196,7 +196,9 @@ public class Server {
 								IOSession session = (IOSession) key
 										.attachment();
 								// session.writeData();
-								addWriteEvent(session);
+								if (session != null) {
+									addWriteEvent(session);
+								}
 							}
 						}
 					}
@@ -217,7 +219,8 @@ public class Server {
 					executor.execute(command);
 				}
 			};
-			String name = "io events executor";
+			String name = Thread.currentThread().getName()
+					+ " [io events executor]";
 			new Thread(runner, name).start();
 		}
 
