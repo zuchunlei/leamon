@@ -1,6 +1,6 @@
-package nio.reactor.echo.main;
+package nio.reactor.general.main;
 
-import nio.reactor.echo.server.Server;
+import nio.reactor.general.server.Server;
 
 /**
  * ·şÎñ²âÊÔÀà

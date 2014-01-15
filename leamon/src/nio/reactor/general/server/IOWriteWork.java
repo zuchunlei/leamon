@@ -1,11 +1,11 @@
-package nio.reactor.echo.server;
+package nio.reactor.general.server;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
-import nio.reactor.echo.server.Server.Poller;
+import nio.reactor.general.server.Server.Poller;
 
 /**
  * 具体IO事件处理的任务对象，由外部线程池调用。

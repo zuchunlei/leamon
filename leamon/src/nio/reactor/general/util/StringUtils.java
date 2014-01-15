@@ -1,4 +1,4 @@
-package nio.reactor.echo.util;
+package nio.reactor.general.util;
 
 /**
  * ×Ö·û´®¹¤¾ßÀà

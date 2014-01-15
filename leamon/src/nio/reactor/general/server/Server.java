@@ -1,4 +1,4 @@
-package nio.reactor.echo.server;
+package nio.reactor.general.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

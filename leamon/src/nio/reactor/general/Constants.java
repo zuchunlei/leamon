@@ -1,4 +1,4 @@
-package nio.reactor.echo;
+package nio.reactor.general;
 
 /**
  * 常量标识符的统一注册位置

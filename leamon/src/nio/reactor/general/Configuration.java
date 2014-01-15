@@ -1,10 +1,10 @@
-package nio.reactor.echo;
+package nio.reactor.general;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import nio.reactor.echo.util.StringUtils;
+import nio.reactor.general.util.StringUtils;
 
 /**
  * 配置类，读取配置文件。
