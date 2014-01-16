@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import nio.reactor.general.data.DataPacket;
 import nio.reactor.general.io.IOFilter;
 import nio.reactor.general.io.IOFilterChain;
+import nio.reactor.general.io.IOHandler;
 
 /**
  * NIO Reactor模式的Echo Server实现
@@ -31,6 +32,7 @@ public class Server {
 	private volatile boolean running;
 	private List<IOFilter> filters;// IO过滤器集合
 	private IOFilterChain chain;// 过滤链对象
+	private IOHandler handler;// 处理器对象
 
 	private Poller[] pollers;// 轮询对象，处理SocketChannel的I/O事件
 
@@ -47,6 +49,10 @@ public class Server {
 		for (int i = 0; i < pollers.length; i++) {
 			pollers[i] = new Poller();
 		}
+	}
+
+	public void setHandler(IOHandler handler) {
+		this.handler = handler;
 	}
 
 	public String getHost() {
@@ -537,6 +543,7 @@ public class Server {
 				filter.onReadComplete(packet, next);
 				return;
 			}
+			handler.handle(packet);
 		}
 
 		@Override
