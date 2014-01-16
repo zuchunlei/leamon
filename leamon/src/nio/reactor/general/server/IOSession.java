@@ -42,10 +42,35 @@ public class IOSession {
 		if (inReading.compareAndSet(false, true)) {
 			// SocketChannel channel = (SocketChannel) key.channel();
 			try {
-				channel.read(buffer);
+				// channel.read(buffer);
+				// 使用消息的自定义边界来解决该问题（发送方与接收方协定），基于字节长度
+				int length = 0;
+				int total = 0;
+				boolean readed = false;// 是否读取了数据包长度
+				do {
+					length += channel.read(buffer);
+					if (!readed && length >= 4) {// 通过readed标识，解决循环执行，影响效率的问题
+						total = buffer.getInt(0);
+						readed = true;
+					}
+					if (length == -1) {// 读到close标识EOF
+						key.cancel();
+						channel.close();
+						return;// 保证正确返回
+					}
+				} while (length != total + 4);
+
+				// 去除前四个字节
+				ByteBuffer content = ByteBuffer.allocate(total);
+				for (int i = 4; i < buffer.position(); i++) {
+					content.put(buffer.get(i));
+				}
+
+				// 清空buffer
+				buffer.clear();
 
 				// 数据读取完成，构造DataPacket进行应用层处理
-				packet = new DataPacket(channel.getRemoteAddress(), buffer);
+				packet = new DataPacket(channel.getRemoteAddress(), content);
 
 				// 网络读完成（数据已从内核态到用户态），进行应用层处理
 				onReadComplete(packet);
@@ -75,7 +100,10 @@ public class IOSession {
 
 		// 进行网络写操作
 		try {
-			channel.write(packet.getContent());
+			ByteBuffer conetnt = packet.getContent();
+			conetnt.flip();
+
+			channel.write(conetnt);
 		} catch (IOException e) {
 			// 在channel读写时发生异常
 			this.key.cancel();
