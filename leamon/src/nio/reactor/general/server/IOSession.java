@@ -7,6 +7,7 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import nio.reactor.general.data.DataPacket;
+import nio.reactor.general.io.IOFilterChain;
 import nio.reactor.general.server.Server.Poller;
 
 /**
@@ -23,6 +24,8 @@ public class IOSession {
 	private SocketChannel channel;// IOÐÅµÀ
 	private DataPacket packet;
 
+	private IOFilterChain chain;// IO¹ýÂËÁ´
+
 	public IOSession(SelectionKey key, Poller poller) {
 		this.key = key;
 		this.channel = (SocketChannel) key.channel();
@@ -33,6 +36,10 @@ public class IOSession {
 
 	public boolean isReading() {
 		return inReading.get();
+	}
+
+	public void setChain(IOFilterChain chain) {
+		this.chain = chain;
 	}
 
 	/**
@@ -124,8 +131,8 @@ public class IOSession {
 	 * 
 	 * @param packet
 	 */
-	public void onReadComplete(DataPacket packet) {
-
+	private void onReadComplete(DataPacket packet) {
+		chain.onReadComplete(packet);
 	}
 
 	/**
@@ -133,8 +140,8 @@ public class IOSession {
 	 * 
 	 * @param packet
 	 */
-	public void onWriteReady(DataPacket packet) {
-
+	private void onWriteReady(DataPacket packet) {
+		chain.onWriteReady(packet);
 	}
 
 	/**

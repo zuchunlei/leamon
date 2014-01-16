@@ -6,12 +6,16 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import nio.reactor.general.io.IOFilter;
 
 /**
  * NIO Reactor模式的Echo Server实现
@@ -23,6 +27,7 @@ public class Server {
 
 	private AtomicInteger incr;// 计数器
 	private volatile boolean running;
+	private List<IOFilter> filters;// IO过滤器集合
 
 	private Poller[] pollers;// 轮询对象，处理SocketChannel的I/O事件
 
@@ -32,11 +37,42 @@ public class Server {
 		this.host = host;
 		this.port = port;
 		this.incr = new AtomicInteger(Integer.MIN_VALUE);
+		this.filters = new ArrayList<IOFilter>();
+
 		// this.accept = new AtomicBoolean();
 		this.pollers = new Poller[Runtime.getRuntime().availableProcessors() + 1];// Poller的个数为当前可用CPU+1
 		for (int i = 0; i < pollers.length; i++) {
 			pollers[i] = new Poller();
 		}
+	}
+
+	public String getHost() {
+		return host;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public void addIOFilter(IOFilter filter) {
+		filters.add(filter);
+	}
+
+	public boolean start() {
+		running = true;
+		// 启动Poller
+		for (int i = 0; i < pollers.length; i++) {
+			String name = "Poller Thread - " + i;
+			new Thread(pollers[i], name).start();
+		}
+		// 启动Acceptor
+		new Thread(new Acceptor(), "Acceptor Thread").start();
+
+		return running;
+	}
+
+	public void stop() {
+		running = false;
 	}
 
 	/**
@@ -462,30 +498,5 @@ public class Server {
 		// };
 		// ioevents.add(command);
 		// }
-	}
-
-	public String getHost() {
-		return host;
-	}
-
-	public int getPort() {
-		return port;
-	}
-
-	public boolean start() {
-		running = true;
-		// 启动Poller
-		for (int i = 0; i < pollers.length; i++) {
-			String name = "Poller Thread - " + i;
-			new Thread(pollers[i], name).start();
-		}
-		// 启动Acceptor
-		new Thread(new Acceptor(), "Acceptor Thread").start();
-
-		return running;
-	}
-
-	public void stop() {
-		running = false;
 	}
 }
