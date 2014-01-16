@@ -15,7 +15,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import nio.reactor.general.data.DataPacket;
 import nio.reactor.general.io.IOFilter;
+import nio.reactor.general.io.IOFilterChain;
 
 /**
  * NIO Reactor模式的Echo Server实现
@@ -28,6 +30,7 @@ public class Server {
 	private AtomicInteger incr;// 计数器
 	private volatile boolean running;
 	private List<IOFilter> filters;// IO过滤器集合
+	private IOFilterChain chain;// 过滤链对象
 
 	private Poller[] pollers;// 轮询对象，处理SocketChannel的I/O事件
 
@@ -52,6 +55,13 @@ public class Server {
 
 	public int getPort() {
 		return port;
+	}
+
+	public IOFilterChain getIOFilterChain() {
+		if (chain == null) {
+			chain = new Node();
+		}
+		return chain;
 	}
 
 	public void addIOFilter(IOFilter filter) {
@@ -211,6 +221,8 @@ public class Server {
 										.attachment();
 								if (session == null) {
 									session = new IOSession(key, this);
+									// 设置业务处理链
+									session.setChain(getIOFilterChain());
 									key.attach(session);
 								}
 								// 取消兴趣读，读数据，业务处理，注册兴趣写。
@@ -498,5 +510,42 @@ public class Server {
 		// };
 		// ioevents.add(command);
 		// }
+	}
+
+	/**
+	 * 过滤器链的默认实现
+	 */
+	class Node implements IOFilterChain {
+
+		private IOFilter filter;
+		private IOFilterChain next;
+
+		Node() {
+			this(0);
+		}
+
+		private Node(int index) {
+			if (index < filters.size()) {
+				filter = filters.get(index);
+				next = new Node(++index);
+			}
+		}
+
+		@Override
+		public void onReadComplete(DataPacket packet) {
+			if (filter != null) {
+				filter.onReadComplete(packet, next);
+				return;
+			}
+		}
+
+		@Override
+		public DataPacket onWriteReady(DataPacket packet) {
+			if (filter != null) {
+				packet = filter.onWriteReady(packet, next);
+				return packet;
+			}
+			return packet;
+		}
 	}
 }
