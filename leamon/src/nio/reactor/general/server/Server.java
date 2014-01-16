@@ -7,11 +7,9 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -125,7 +123,8 @@ public class Server {
 		private AtomicBoolean wakeup;// 唤醒标识，原子类，排他。
 		private Selector selector;
 		private Executor executor;// 具体IO执行的线程池
-		private BlockingQueue<Runnable> ioevents;// IO读写事件
+
+		// private BlockingQueue<Runnable> ioevents;// IO读写事件
 
 		public Poller() {
 			// this.channels = new ConcurrentLinkedQueue<SelectionKey>();
@@ -144,9 +143,9 @@ public class Server {
 			} catch (IOException e) {
 			}
 			this.executor = Executors.newCachedThreadPool();
-			this.ioevents = new LinkedBlockingQueue<Runnable>();
+			// this.ioevents = new LinkedBlockingQueue<Runnable>();
 
-			handlIoEvent();// 处理IO读写事件
+			// handlIoEvent();// 处理IO读写事件
 		}
 
 		public Selector getSelector() {
@@ -158,6 +157,8 @@ public class Server {
 		}
 
 		public void run() {
+			// handlIoEvent();// 启动IO读写线程
+
 			while (running) {
 				try {
 					int selected = selector.select(1000);// 选择等待1s
@@ -179,12 +180,13 @@ public class Server {
 								// 取消兴趣读，读数据，业务处理，注册兴趣写。
 								unRegisterRead(key);// 取消所有兴趣关注点
 
-								// IOReadWork work = new IOReadWork(this, key);
-								// executor.execute(work);
+								IOReadWork work = new IOReadWork(session);
+								executor.execute(work);
 
 								// session对象具体处理数据读写的逻辑
 								// session.readData();
-								addReadEvent(session);
+								// addReadEvent(session);
+
 							}
 							if (key.isValid() && key.isWritable()) {// 处理写就绪事件
 								// 取消兴趣写
@@ -197,7 +199,9 @@ public class Server {
 										.attachment();
 								// session.writeData();
 								if (session != null) {
-									addWriteEvent(session);
+									// addWriteEvent(session);
+									IOWriteWork work = new IOWriteWork(session);
+									executor.execute(work);
 								}
 							}
 						}
@@ -211,18 +215,22 @@ public class Server {
 		/**
 		 * 内部处理IO读写事件
 		 */
-		void handlIoEvent() {
-			Runnable runner = new Runnable() {
-				@Override
-				public void run() {
-					Runnable command = ioevents.poll();// 获取并移除queue头部元素，IO task
-					executor.execute(command);
-				}
-			};
-			String name = Thread.currentThread().getName()
-					+ " [io events executor]";
-			new Thread(runner, name).start();
-		}
+		// void handlIoEvent() {
+		// Runnable runner = new Runnable() {
+		// @Override
+		// public void run() {
+		// while (running) {
+		// Runnable command = ioevents.poll();// 获取IO task
+		// if (command != null) {
+		// executor.execute(command);
+		// }
+		// }
+		// }
+		// };
+		// String name = Thread.currentThread().getName()
+		// + " [io events executor]";
+		// new Thread(runner, name).start();
+		// }
 
 		/**
 		 * 内部统一注册信道的事件
@@ -428,32 +436,32 @@ public class Server {
 		 * 
 		 * @param session
 		 */
-		void addReadEvent(final IOSession session) {
-			if (!session.isReading()) {
-				Runnable command = new Runnable() {
-					@Override
-					public void run() {
-						session.readData();
-					}
-				};
-				ioevents.add(command);
-			}
-		}
+		// void addReadEvent(final IOSession session) {
+		// if (!session.isReading()) {
+		// Runnable command = new Runnable() {
+		// @Override
+		// public void run() {
+		// session.readData();
+		// }
+		// };
+		// ioevents.add(command);
+		// }
+		// }
 
 		/**
 		 * 处理IO Write事件
 		 * 
 		 * @param session
 		 */
-		void addWriteEvent(final IOSession session) {
-			Runnable command = new Runnable() {
-				@Override
-				public void run() {
-					session.writeData();
-				}
-			};
-			ioevents.add(command);
-		}
+		// void addWriteEvent(final IOSession session) {
+		// Runnable command = new Runnable() {
+		// @Override
+		// public void run() {
+		// session.writeData();
+		// }
+		// };
+		// ioevents.add(command);
+		// }
 	}
 
 	public String getHost() {
