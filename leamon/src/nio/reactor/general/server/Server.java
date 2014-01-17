@@ -41,7 +41,7 @@ public class Server {
 	public Server(String host, int port) {
 		this.host = host;
 		this.port = port;
-		this.incr = new AtomicInteger(Integer.MIN_VALUE);
+		this.incr = new AtomicInteger(Integer.MAX_VALUE);
 		this.filters = new ArrayList<IOFilter>();
 
 		// this.accept = new AtomicBoolean();
@@ -221,6 +221,22 @@ public class Server {
 						while (it.hasNext()) {
 							SelectionKey key = it.next();
 							it.remove();
+							if (key.isValid() && key.isWritable()) {// 处理写就绪事件
+								// 取消兴趣写
+								unRegisterWrite(key);
+								// IOWriteWork work = new IOWriteWork(this,
+								// key);
+								// executor.execute(work);
+
+								IOSession session = (IOSession) key
+										.attachment();
+								// session.writeData();
+								if (session != null) {
+									// addWriteEvent(session);
+									IOWriteWork work = new IOWriteWork(session);
+									executor.execute(work);
+								}
+							}
 							if (key.isValid() && key.isReadable()) {// 处理读就绪事件
 								// 创建IOSession对象，该对象内部封装了具体的IO读写逻辑，以及业务处理的逻辑。
 								IOSession session = (IOSession) key
@@ -240,23 +256,6 @@ public class Server {
 								// session对象具体处理数据读写的逻辑
 								// session.readData();
 								// addReadEvent(session);
-
-							}
-							if (key.isValid() && key.isWritable()) {// 处理写就绪事件
-								// 取消兴趣写
-								unRegisterWrite(key);
-								// IOWriteWork work = new IOWriteWork(this,
-								// key);
-								// executor.execute(work);
-
-								IOSession session = (IOSession) key
-										.attachment();
-								// session.writeData();
-								if (session != null) {
-									// addWriteEvent(session);
-									IOWriteWork work = new IOWriteWork(session);
-									executor.execute(work);
-								}
 							}
 						}
 					}
