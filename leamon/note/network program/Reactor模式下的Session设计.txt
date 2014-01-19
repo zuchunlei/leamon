@@ -26,6 +26,15 @@ FilterChain与Handler是Session中处理数据的业务层基础设施。
 Session的读数据操作！！特别注意，如何保证读取数据的完整性？
 数据的读取操作将由Executor去执行。
 
-
 Session的写数据操作！！
 读取的数据经过业务处理以后返回，作为 响应写出。
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+异步IO的请求对象，作为中间产物。（深入浅出node.js）
+何为请求对象？（读请求，写请求）与IOSession对象的关系？
+
+IOSession<---->Channel 一对一关系
+
+当Channel就绪读OP_READ事件达到（当前数据存在于Channel对应的Socket的内核缓冲区RecvQ中），
+Poller将对当前Read就绪事件到达的IOSession封装成IO读请求对象ReadRequest，所有的读操作将在ReadRequest中进行，该对象将由Poller中的线程池调度。
+当Channel就绪读OP_WRITE事件达到（当前数据存在于Channel对应的IOSession的应用缓冲区中，在用户态下），
+Poller将对当前Write就绪事件到达的IOSession封装成IO写请求对象WriteRequest，所有的写操作将在WriteRequest中进行，该对象将由Poller中的线程池调度。
