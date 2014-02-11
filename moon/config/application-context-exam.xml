@@ -31,9 +31,27 @@
 		</property>
 	</bean>
 
-	<bean id="service" class="com.bes.ssh.exam.service.impl.ServiceImpl">
+	<bean id="serviceTarget" class="com.bes.ssh.exam.service.impl.ServiceImpl">
 		<property name="dao">
 			<ref local="dao" />
+		</property>
+	</bean>
+
+	<bean id="service"
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<!-- 事务管理器 -->
+		<property name="transactionManager">
+			<ref local="transactionManager" />
+		</property>
+		<!-- 代理目标 -->
+		<property name="target">
+			<ref local="serviceTarget" />
+		</property>
+		<!-- 事务属性 -->
+		<property name="transactionAttributes">
+			<props>
+				<prop key="add">PROPAGATION_REQUIRED</prop>
+			</props>
 		</property>
 	</bean>
 
