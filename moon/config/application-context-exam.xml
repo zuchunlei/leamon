@@ -17,6 +17,14 @@
 		<property name="password" value="root"></property>
 	</bean>
 
+	<!-- 事务管理器 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource">
+			<ref local="dataSource" />
+		</property>
+	</bean>
+
 	<bean id="dao" class="com.bes.ssh.exam.dao.impl.DaoImpl">
 		<property name="dataSource">
 			<ref local="dataSource" />
