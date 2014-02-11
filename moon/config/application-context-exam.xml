@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                    ">
+
+	<!-- 本地数据源 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass" value="org.gjt.mm.mysql.Driver"></property>
+		<property name="jdbcUrl" value="jdbc:mysql://192.168.1.57:3306/test"></property>
+		<property name="user" value="root"></property>
+		<property name="password" value="root"></property>
+	</bean>
+
+	<bean id="dao" class="com.bes.ssh.exam.dao.impl.DaoImpl">
+		<property name="dataSource">
+			<ref local="dataSource" />
+		</property>
+	</bean>
+
+	<bean id="service" class="com.bes.ssh.exam.service.impl.ServiceImpl">
+		<property name="dao">
+			<ref local="dao" />
+		</property>
+	</bean>
+
+</beans>
