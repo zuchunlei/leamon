@@ -16,5 +16,6 @@ public class ServiceImpl implements Service {
 
 	public void add(String name, String password) {
 		dao.add(name, password);
+		System.out.println(10 / 0);
 	}
 }
