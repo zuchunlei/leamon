@@ -26,6 +26,22 @@
 		</property>
 	</bean>
 
+	<!-- 本地事务配置模板，所有的事务代理对象均复用该模板 -->
+	<bean id="localTransactionConfigTemplet"
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+		abstract="true">
+		<!-- 事务管理器 -->
+		<property name="transactionManager">
+			<ref local="transactionManager" />
+		</property>
+		<!-- 事务属性 -->
+		<property name="transactionAttributes">
+			<props>
+				<prop key="add">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
 	<bean id="dao" class="com.bes.ssh.exam.dao.impl.DaoImpl">
 		<property name="dataSource">
 			<ref local="dataSource" />
@@ -38,21 +54,10 @@
 		</property>
 	</bean>
 
-	<bean id="service"
-		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<!-- 事务管理器 -->
-		<property name="transactionManager">
-			<ref local="transactionManager" />
-		</property>
+	<bean id="service" parent="localTransactionConfigTemplet">
 		<!-- 代理目标 -->
 		<property name="target">
 			<ref local="serviceTarget" />
-		</property>
-		<!-- 事务属性 -->
-		<property name="transactionAttributes">
-			<props>
-				<prop key="add">PROPAGATION_REQUIRED</prop>
-			</props>
 		</property>
 	</bean>
 
