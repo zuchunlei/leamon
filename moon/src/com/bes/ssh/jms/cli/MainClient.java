@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.bes.ssh.jms.receiver.MessageReceiver;
 import com.bes.ssh.jms.sender.MessageSender;
 
 public class MainClient {
@@ -19,5 +20,14 @@ public class MainClient {
 		message.put("name", "zuchunlei");
 
 		sender.sendMessage(message);
+
+		MessageReceiver receiver = (MessageReceiver) context
+				.getBean("messageReceiver");
+
+		for (Map.Entry<String, Object> entry : receiver.receiveMessage()
+				.entrySet()) {
+			System.out.println(entry.getKey() + ":" + entry.getValue());
+		}
+
 	}
 }
