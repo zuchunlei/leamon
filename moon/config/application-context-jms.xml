@@ -15,19 +15,20 @@
 
 	<!-- JMS目标对象 -->
 	<bean id="destination" class="org.apache.activemq.command.ActiveMQQueue">
-		<constructor-arg index="0" value="c1"></constructor-arg>
+		<constructor-arg index="0" value="c2"></constructor-arg>
 	</bean>
 
 	<!-- JMS操作模板 -->
 	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
 		<!-- JMS操作模板需要JMS的连接工厂 -->
 		<property name="connectionFactory" ref="connectionFactory"></property>
+		<!-- 默认的目标 -->
+		<property name="defaultDestination" ref="destination"></property>
 	</bean>
 
 	<!-- messgaeSender Bean -->
 	<bean id="messageSender" class="com.bes.ssh.jms.sender.MessageSenderImpl">
 		<property name="jmsTemplate" ref="jmsTemplate"></property>
-		<property name="destination" ref="destination"></property>
 	</bean>
 
 </beans>

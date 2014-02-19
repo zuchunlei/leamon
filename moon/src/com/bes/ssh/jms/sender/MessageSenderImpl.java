@@ -16,22 +16,15 @@ import org.springframework.jms.core.MessageCreator;
  */
 public class MessageSenderImpl implements MessageSender {
 
-	// JMSÄ¿±ê
-	private Destination destination;
-
 	// JMSÄ£°å
 	private JmsTemplate jmsTemplate;
-
-	public void setDestination(Destination destination) {
-		this.destination = destination;
-	}
 
 	public void setJmsTemplate(JmsTemplate jmsTemplate) {
 		this.jmsTemplate = jmsTemplate;
 	}
 
 	public void sendMessage(final Map<String, Object> message) {
-		jmsTemplate.send(destination, new MessageCreator() {
+		jmsTemplate.send(new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {
 				MapMessage mapMessgae = session.createMapMessage();
 
