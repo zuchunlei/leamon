@@ -18,7 +18,11 @@
 		<!-- JMS操作模板需要JMS的连接工厂 -->
 		<property name="connectionFactory" ref="connectionFactory"></property>
 		<!-- 默认的目标名称 -->
-		<property name="defaultDestinationName" value="c3"></property>
+		<property name="defaultDestinationName" value="c4"></property>
+		<!-- 配置JMS Message的转换器 -->
+		<property name="messageConverter">
+			<bean class="com.bes.ssh.jms.sender.impl.MapMessageConverter"></bean>
+		</property>
 	</bean>
 
 	<!-- messgaeSender Bean -->
