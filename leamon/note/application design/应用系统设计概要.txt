@@ -33,5 +33,11 @@
 	POJO更倾向于对象内部实现细节，而JavaBean更倾向于面向对象的设计与组织。
 	
 	POJO：实例域与方法，JavaBean：属性与行为。
-	
-	
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+问：Java Web领域，Servlet规范的历史版本变更？
+答： Servlet 3 	|	December  |2009 |  JavaEE 6, JavaSE 6   Pluggability, Ease of development, Async Servlet, Security, File Uploading  
+    Servlet 2.5	|	September |2005 |  JavaEE 5, JavaSE 5   Requires JavaSE 5, supports annotations   
+	Servlet 2.4	|	November  |2003 |  J2EE 1.4, J2SE 1.3   web.xml 
+	Servlet 2.1	|	November  |1998 |  Unspecified   First official specification, added RequestDispatcher, ServletContext   
+	Servlet 2	|			  |		|  JDK 1.1   Part of Java Servlet Development Kit 2.0   
+	Servlet 1	|	June 	  |1997 |  undefined	
