@@ -22,7 +22,7 @@
 	</bean>
 
 	<!-- messgaeSender Bean -->
-	<bean id="messageSender" class="com.bes.ssh.jms.sender.MessageSenderImpl">
+	<bean id="messageSender" class="com.bes.ssh.jms.sender.impl.MessageSenderImpl">
 		<property name="jmsTemplate" ref="jmsTemplate"></property>
 	</bean>
 

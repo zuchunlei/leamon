@@ -1,4 +1,4 @@
-package com.bes.ssh.jms.sender;
+package com.bes.ssh.jms.sender.impl;
 
 import java.util.Map;
 
@@ -9,6 +9,8 @@ import javax.jms.Session;
 
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
+
+import com.bes.ssh.jms.sender.MessageSender;
 
 /**
  * JMS 消息发送者
