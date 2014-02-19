@@ -13,17 +13,12 @@
 		<property name="brokerURL" value="tcp://localhost:61616"></property>
 	</bean>
 
-	<!-- JMS目标对象 -->
-	<bean id="destination" class="org.apache.activemq.command.ActiveMQQueue">
-		<constructor-arg index="0" value="c2"></constructor-arg>
-	</bean>
-
 	<!-- JMS操作模板 -->
 	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
 		<!-- JMS操作模板需要JMS的连接工厂 -->
 		<property name="connectionFactory" ref="connectionFactory"></property>
-		<!-- 默认的目标 -->
-		<property name="defaultDestination" ref="destination"></property>
+		<!-- 默认的目标名称 -->
+		<property name="defaultDestinationName" value="c3"></property>
 	</bean>
 
 	<!-- messgaeSender Bean -->

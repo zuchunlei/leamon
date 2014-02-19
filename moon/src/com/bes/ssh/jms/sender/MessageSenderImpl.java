@@ -2,7 +2,6 @@ package com.bes.ssh.jms.sender;
 
 import java.util.Map;
 
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
