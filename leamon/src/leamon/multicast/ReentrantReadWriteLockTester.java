@@ -17,12 +17,47 @@ public class ReentrantReadWriteLockTester {
 		ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
 		ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
 
+		new Thread(new RWTask(readLock, writeLock), "read/write thread ")
+				.start();
+
 		for (int i = 0; i < 3; i++) {
 			new Thread(new ReadTask(readLock), "read thread " + i).start();
 		}
 
 		for (int i = 0; i < 3; i++) {
 			new Thread(new WriteTask(writeLock), "write thread " + i).start();
+		}
+	}
+}
+
+/**
+ * 读写任务
+ */
+class RWTask implements Runnable {
+	private ReentrantReadWriteLock.ReadLock readLock;
+	private ReentrantReadWriteLock.WriteLock writeLock;
+
+	public RWTask(ReentrantReadWriteLock.ReadLock readLock,
+			ReentrantReadWriteLock.WriteLock writeLock) {
+		this.readLock = readLock;
+		this.writeLock = writeLock;
+	}
+
+	/*
+	 * 当前线程上下文中，对读写锁的可重入规则：
+	 * 如果当前线程进行了writeLock.lock()，则可以执行readLock.lock()/writeLock.lock()（读写锁可重入），
+	 * 如果当前线程进行了readLock.lock()，则可以执行readLock.lock()（读锁可重入），
+	 * 不可以执行writeLock.lock()（写锁不可以重入）。
+	 */
+	@Override
+	public void run() {
+		writeLock.lock();
+		try {
+			readLock.lock();
+			// handle data
+			readLock.unlock();
+		} finally {
+			writeLock.unlock();
 		}
 	}
 }
