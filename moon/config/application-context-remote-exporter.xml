@@ -15,5 +15,19 @@
 		</property>
 	</bean>
 
+	<!-- 通过rmi服务输出器，将Bean发布为远程服务对象，通过rmi协议进行通信 -->
+	<bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+		<property name="serviceName">
+			<value>wish</value>
+		</property>
+		<property name="service">
+			<ref local="wishService" />
+		</property>
+		<property name="serviceInterface">
+			<value>com.bes.ssh.remote.service.WishService</value>
+		</property>
+		<!-- rmi注册端口，默认为1099 -->
+		<!-- <property name="registryPort"> <value>60000</value> </property> -->
+	</bean>
 
 </beans>
