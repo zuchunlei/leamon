@@ -9,10 +9,11 @@ public class MainClient {
 
 	public static void main(String[] args) {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
-				"application-context-remote.xml");
+				"application-context-remote-cli.xml");
 
-		WishService service = (WishService) context.getBean("wishService");
-
+		// 获得业务对象，该对象为Spring容器装配过的代理对象，内部织入了网络通信的细节信息
+		WishService service = (WishService) context.getBean("wishRmiService");
+		// 调用业务代理对象，执行rpc调用，发起网络io
 		System.out.println(service.wish("zuchunlei"));
 	}
 
