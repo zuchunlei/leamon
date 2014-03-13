@@ -24,10 +24,19 @@ int main(){
 	float price = 12500.00;
 	double race = 1.25671;
 	
+	// 声明一个指针变量，该指针变量指向一个存放int类型的内存区域（区域长度为4）。
+	int *ptr ;
+	// 将变量sum的内存地址赋值给指针ptr，此时指针变量ptr指向了变量sum所占的内存区域。
+	ptr = &sum;
+
+	
 	printf("primitive type [short int] alloc %d byte space.\n",sizeof(age));
 	printf("primitive type [int] alloc %d byte space.\n",sizeof(sum));
 	printf("primitive type [long int] alloc %d byte space.\n",sizeof(id));
 	printf("primitive type [float] alloc %d byte space.\n",sizeof(price));
 	printf("primitive type [double] alloc %d byte space.\n",sizeof(race));
+	
+	// 所有的指针类型（不管指向如何类型的内存区域），其变量占用内存为4个字节
+	printf("primitive type [point] alloc %d byte space.\n",sizeof(ptr));
 }
 
