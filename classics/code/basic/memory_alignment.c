@@ -1,16 +1,18 @@
 #include <stdio.h>
 
+#pragma pack(2) // 指定程序为指定字节对齐，此例中结构体数据以2字节对齐。Linux下默认为4字节
+
 // 结构体的内存对齐测试
 
 struct Person
 {
-	char sex; // 1个字节
-	int number; // 4字节
-	short age; // 2字节
-	char *name; // 4字节
-	double price; // 8字节
+	char sex; // 1个字节     2 
+	int number; // 4字节     4
+	short age; // 2字节      2
+	char *name; // 4字节     4
+	double price; // 8字节   8
 	
-}; // 以4字节（默认）对齐，该类型结构体变量占用24字节
+}; // 以2字节对齐，该类型结构体变量占用20字节
 
 
 struct Student
