@@ -5,9 +5,9 @@ void assignment(char *);
 
 int main(){
 
-	char *name;// 定义一个指针类型的变量，该指针未指向的有效存储单元。
+	char name[20];// 定义一个字符数组，存在存储空间。
 
-	assignment(name);
+	assignment(name);// 以指针类型参数传递给assignment函数。
 
 	printf("name is %s\n",name);
 
@@ -17,9 +17,6 @@ int main(){
 // 给指针赋值操作
 void assignment(char *name){
 	
-	char buf[20];
+	scanf("%s",name);// 直接操作name所指的存储空间，等同于执行 *name = XXX
 	
-	scanf("%s",buf);
-	
-	name = buf;// 直接对指针变量进行赋值操作，改变的只是当前函数栈帧中name变量的值，对主调函数中没有任何影响。
 }
