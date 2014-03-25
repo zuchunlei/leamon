@@ -16,7 +16,10 @@ int main(){
 
 // 给指针赋值操作
 void assignment(char *name){
-		
-	scanf("%s",name);// 将输入的值，存储到name指针指定的存储单元中。
 	
+	char buf[20];
+	
+	scanf("%s",buf);
+	
+	name = buf;// 直接对指针变量进行赋值操作，改变的只是当前函数栈帧中name变量的值，对主调函数中没有任何影响。
 }
