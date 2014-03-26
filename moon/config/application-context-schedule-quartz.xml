@@ -18,21 +18,26 @@
 	</bean>
 
 	<!-- Quartz调度的执行任务对象,该对象内部封装具体的业务逻辑 -->
-	<bean id="messageJob" class="org.springframework.scheduling.quartz.JobDetailBean">
-		<property name="jobClass">
-			<value>com.bes.ssh.scheduling.quartz.MessageJob</value>
+	<!-- <bean id="messageJob" class="org.springframework.scheduling.quartz.JobDetailBean"> 
+		<property name="jobClass"> <value>com.bes.ssh.scheduling.quartz.MessageJob</value> 
+		</property> <property name="jobDataAsMap"> <map> <entry key="messageService" 
+		value-ref="messageService" /> </map> </property> </bean> -->
+
+	<!-- 以MethodInvokingJobDetailFactoryBean的代理生成JobDetail类型的任务对象 -->
+	<bean id="messageJobTarget"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref local="messageService" />
 		</property>
-		<property name="jobDataAsMap">
-			<map>
-				<entry key="messageService" value-ref="messageService" />
-			</map>
+		<property name="targetMethod">
+			<value>sendMessage</value>
 		</property>
 	</bean>
 
 	<!-- Quartz执行的调度对象,该内对象内部维护了执行任务以及任务的执行计划 -->
 	<bean id="messageSimpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
 		<property name="jobDetail">
-			<ref local="messageJob" />
+			<ref local="messageJobTarget" />
 		</property>
 		<property name="startDelay">
 			<value>60000</value>
@@ -44,7 +49,7 @@
 
 	<bean id="messageCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail">
-			<ref local="messageJob" />
+			<ref local="messageJobTarget" />
 		</property>
 		<!-- crontab表达式,域依次为 秒 分 时 日 月 周 -->
 		<property name="cronExpression">
@@ -57,8 +62,8 @@
 		<!-- 配置启动器管理的调度任务列表 -->
 		<property name="triggers">
 			<list>
-				<!-- <ref local="messageSimpleTrigger" /> -->
-				<ref local="messageCronTrigger" />
+				<ref local="messageSimpleTrigger" />
+				<!--<ref local="messageCronTrigger" /> -->
 			</list>
 		</property>
 		<!-- 装配Quartz框架的配置信息 -->

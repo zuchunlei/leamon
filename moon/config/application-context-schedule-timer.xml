@@ -18,9 +18,18 @@
 	</bean>
 
 	<!-- 装配任务对象 -->
-	<bean id="messageTask" class="com.bes.ssh.scheduling.timer.MessageTask">
-		<property name="messageService">
+	<!-- <bean id="messageTask" class="com.bes.ssh.scheduling.timer.MessageTask"> 
+		<property name="messageService"> <ref local="messageService" /> </property> 
+		</bean> -->
+
+	<!-- 以MethodInvokingTimerTaskFactoryBean的代理方式生成TimerTask类型的任务对象 -->
+	<bean id="messageTaskTarget"
+		class="org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean">
+		<property name="targetObject">
 			<ref local="messageService" />
+		</property>
+		<property name="targetMethod">
+			<value>sendMessage</value>
 		</property>
 	</bean>
 
@@ -28,7 +37,7 @@
 	<bean id="messageTimerTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
 		<!-- 执行任务 -->
 		<property name="timerTask">
-			<ref local="messageTask" />
+			<ref local="messageTaskTarget" />
 		</property>
 		<!-- 执行策略配置 -->
 
