@@ -17,10 +17,44 @@
 		</property>
 	</bean>
 
-	<bean id="messageJob" class="com.bes.ssh.scheduling.quartz.MessageJob">
-		<property name="messageService">
-			<ref local="messageService" />
+	<!-- Quartz调度的执行任务对象,该对象内部封装具体的业务逻辑 -->
+	<bean id="messageJob" class="org.springframework.scheduling.quartz.JobDetailBean">
+		<property name="jobClass">
+			<value>com.bes.ssh.scheduling.quartz.MessageJob</value>
+		</property>
+		<property name="jobDataAsMap">
+			<map>
+				<entry key="messageService" value-ref="messageService" />
+			</map>
 		</property>
 	</bean>
 
+	<!-- Quartz执行的调度对象,该内对象内部维护了执行任务以及任务的执行计划 -->
+	<bean id="messageTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+		<property name="jobDetail">
+			<ref local="messageJob" />
+		</property>
+		<property name="startDelay">
+			<value>60000</value>
+		</property>
+		<property name="repeatInterval">
+			<value>6000</value>
+		</property>
+	</bean>
+
+	<!-- Quartz执行启动器,该对象内部配置Quartz启动线程等资源的属性信息 -->
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<!-- 配置启动器管理的调度任务列表 -->
+		<property name="triggers">
+			<list>
+				<ref local="messageTrigger" />
+			</list>
+		</property>
+		<!-- 装配Quartz框架的配置信息 -->
+		<property name="quartzProperties">
+			<props>
+				<prop key="org.quartz.threadPool.threadCount">1</prop>
+			</props>
+		</property>
+	</bean>
 </beans>
