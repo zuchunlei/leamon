@@ -30,7 +30,7 @@
 	</bean>
 
 	<!-- Quartz执行的调度对象,该内对象内部维护了执行任务以及任务的执行计划 -->
-	<bean id="messageTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+	<bean id="messageSimpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
 		<property name="jobDetail">
 			<ref local="messageJob" />
 		</property>
@@ -42,12 +42,23 @@
 		</property>
 	</bean>
 
+	<bean id="messageCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref local="messageJob" />
+		</property>
+		<!-- crontab表达式,域依次为 秒 分 时 日 月 周 -->
+		<property name="cronExpression">
+			<value>0 25 15 * * ?</value>
+		</property>
+	</bean>
+
 	<!-- Quartz执行启动器,该对象内部配置Quartz启动线程等资源的属性信息 -->
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<!-- 配置启动器管理的调度任务列表 -->
 		<property name="triggers">
 			<list>
-				<ref local="messageTrigger" />
+				<!-- <ref local="messageSimpleTrigger" /> -->
+				<ref local="messageCronTrigger" />
 			</list>
 		</property>
 		<!-- 装配Quartz框架的配置信息 -->
