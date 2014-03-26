@@ -17,4 +17,38 @@
 		</property>
 	</bean>
 
+	<!-- 装配任务对象 -->
+	<bean id="messageTask" class="com.bes.ssh.scheduling.timer.MessageTask">
+		<property name="messageService">
+			<ref local="messageService" />
+		</property>
+	</bean>
+
+	<!-- 装配定时器执行调度对象,该对象内部持有定时执行策略 -->
+	<bean id="messageTimerTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+		<!-- 执行任务 -->
+		<property name="timerTask">
+			<ref local="messageTask" />
+		</property>
+		<!-- 执行策略配置 -->
+
+		<!-- 执行周期,以毫秒为单位 -->
+		<property name="period">
+			<value>60000</value>
+		</property>
+		<!-- 是否以固定速率执行任务 -->
+		<property name="fixedRate">
+			<value>true</value>
+		</property>
+	</bean>
+
+	<!-- 定时任务启动器,用来驱动定时任务的执行 -->
+	<bean class="org.springframework.scheduling.timer.TimerFactoryBean">
+		<property name="scheduledTimerTasks">
+			<list>
+				<ref local="messageTimerTask" />
+			</list>
+		</property>
+	</bean>
+
 </beans>
