@@ -3,7 +3,7 @@ package com.bes.ssh.svnkit.service;
 /**
  * SVN工具服务接口
  */
-public interface SVNKitService {
+public interface SvnKitService {
 
 	/**
 	 * 扫描subversion版本库信息，将提交信息与提交操作的变化信息进行统计并存储

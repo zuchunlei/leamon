@@ -13,6 +13,17 @@ public class RepoParameter implements Serializable {
 
 	private String username;
 
+	private String password;
+
+	public RepoParameter() {
+	}
+
+	public RepoParameter(String url, String username, String password) {
+		this.url = url;
+		this.username = username;
+		this.password = password;
+	}
+
 	public String getUrl() {
 		return url;
 	}
@@ -36,7 +47,5 @@ public class RepoParameter implements Serializable {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
-	private String password;
 
 }
