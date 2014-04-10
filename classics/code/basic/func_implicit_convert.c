@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+float func(int);
+
 int main(){
 	
 	float param = 10;
