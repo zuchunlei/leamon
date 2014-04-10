@@ -2,7 +2,9 @@
 
 int main(){
 	
-	float number = func();//当前func函数没有原型，则编译器会对其参数和返回值进行类型的隐式转换。
+	float param = 10;
+
+	float number = func(param);//当前func函数没有原型，则编译器会对其参数和返回值进行类型的隐式转换。
 
 	printf("number is %f\n",number);
 
