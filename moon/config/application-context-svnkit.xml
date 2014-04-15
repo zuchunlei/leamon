@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                    ">
+
+	<!-- 本地数据源 -->
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.SingleConnectionDataSource"
+		destroy-method="destroy">
+		<property name="driverClassName" value="org.gjt.mm.mysql.Driver"></property>
+		<property name="url" value="jdbc:mysql://192.168.1.57:3306/test"></property>
+		<property name="username" value="root"></property>
+		<property name="password" value="root"></property>
+	</bean>
+
+	<!-- 事务管理器 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource">
+			<ref local="dataSource" />
+		</property>
+	</bean>
+
+	<!-- 抽象事务配置模板 -->
+	<bean id="txConfigTemplate"
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+		abstract="true">
+		<property name="transactionManager">
+			<ref local="transactionManager" />
+		</property>
+		<!-- 事务属性 -->
+		<property name="transactionAttributes">
+			<props>
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="commentDao" class="com.bes.ssh.svnkit.dao.impl.CommentEntryDaoImpl">
+		<property name="dataSource">
+			<ref local="dataSource" />
+		</property>
+	</bean>
+
+	<bean id="changeDao" class="com.bes.ssh.svnkit.dao.impl.ChangeEntryDaoImpl">
+		<property name="dataSource">
+			<ref local="dataSource" />
+		</property>
+	</bean>
+
+	<bean id="svnKitService" parent="txConfigTemplate">
+		<property name="target">
+			<!-- 匿名bean -->
+			<bean class="com.bes.ssh.svnkit.service.impl.SvnKitServiceImpl">
+				<property name="commentDao">
+					<ref local="commentDao" />
+				</property>
+				<property name="changeDao">
+					<ref local="changeDao" />
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 任务对象 -->
+	<bean id="svnKitScanJob" class="org.springframework.scheduling.quartz.JobDetailBean">
+		<property name="jobClass">
+			<value>com.bes.ssh.svnkit.task.SvnKitScanTask</value>
+		</property>
+		<property name="jobDataAsMap">
+			<map>
+				<entry key="username" value="zuchunlei" />
+				<entry key="password" value="123456" />
+				<entry key="url" value="svn://localhost:20001" />
+				<entry key="svnKitService" value-ref="svnKitService" />
+			</map>
+		</property>
+	</bean>
+
+	<!-- 调度对象 -->
+	<bean id="svnKitScanTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+		<property name="jobDetail">
+			<ref local="svnKitScanJob" />
+		</property>
+		<!-- 执行计划 -->
+		<property name="startDelay">
+			<value>60000</value>
+		</property>
+		<property name="repeatInterval">
+			<value>6000</value>
+		</property>
+	</bean>
+
+	<!-- 调度执行器 -->
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="svnKitScanTrigger" />
+			</list>
+		</property>
+	</bean>
+
+</beans>
