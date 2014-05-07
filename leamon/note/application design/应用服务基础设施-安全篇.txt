@@ -24,3 +24,33 @@ Realm：存储身份验证时所需数据的地方。
 
 对用户的认证方式由应用程序在web.xml中指定。
 ------------------------------------------------------------------------------------------------------
+web.xml中对JavaEE安全的具体配置
+
+	<!-- 指定对用户的认证方式，BASIC采用浏览器默认的认证方式 -->
+	<login-config>
+		<auth-method>BASIC</auth-method>
+	</login-config>
+
+	<!-- 定义角色，其中角色的名称为access -->
+	<security-role>
+		<role-name>access</role-name>
+	</security-role>
+
+	<!-- 通过角色名称与web资源共同构建安全约束单元 -->
+	<security-constraint>
+		<!-- 通过url-pattern方式声明web资源 -->
+		<web-resource-collection>
+			<web-resource-name>encode resource</web-resource-name>
+			<url-pattern>/encode/*</url-pattern>
+		</web-resource-collection>
+		<!-- 将指定的角色名称绑定到web资源上 -->
+		<auth-constraint>
+			<role-name>access</role-name>
+		</auth-constraint>
+	</security-constraint>
+
+Tomcat服务器对角色与用户的配置，tomcat-user.xml
+<tomcat-users>
+	<role rolename="access"/>
+	<user username="zuchunlei" password="zuchunlei" roles="access"/>
+</tomcat-users>
