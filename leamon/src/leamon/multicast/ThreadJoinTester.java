@@ -4,9 +4,9 @@ public class ThreadJoinTester {
 
 	public static void main(String[] args) {
 
-		Thread assist = new AssistThread();
-		Thread main = new MainThread(assist);
-		assist.start();
+		Thread general = new GeneralThread();
+		Thread main = new MainThread(general);
+		general.start();
 		main.start();
 
 	}
@@ -18,11 +18,14 @@ public class ThreadJoinTester {
 		private Thread t;
 
 		public MainThread(Thread t) {
+			this.setName("main thread");
 			this.t = t;
 		}
 
 		public void run() {
 			try {
+				Thread.sleep(10 * 1000);
+				t.interrupt();
 				t.join();
 			} catch (InterruptedException e) {
 				// ignore
@@ -45,4 +48,24 @@ public class ThreadJoinTester {
 			}
 		}
 	}
+
+	/**
+	 * 线程对象，启动以后退出。
+	 */
+	static class GeneralThread extends Thread {
+
+		public GeneralThread() {
+			this.setName("general thread");
+		}
+
+		@Override
+		public void run() {
+			try {
+				Thread.sleep(6 * 1000);
+			} catch (InterruptedException e) {
+				// ignore
+			}
+		}
+	}
+
 }
