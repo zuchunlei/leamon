@@ -1,0 +1,7 @@
+javac -g:lines vars source 之间的差别？
+
+lines: class文件中只生成LineNumberTable
+vars: class文件中只生成LocalVariableTable
+source: class文件中只生成sourcefile
+
+如果只采用-g参数，则以上符号表均会生成。                                             
