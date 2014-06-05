@@ -37,7 +37,8 @@
 		<!-- 事务属性 -->
 		<property name="transactionAttributes">
 			<props>
-				<prop key="add">PROPAGATION_REQUIRED</prop>
+				<prop key="add*">PROPAGATION_REQUIRED</prop>
+				<prop key="get*">readOnly,ISOLATION_READ_COMMITTED</prop>
 			</props>
 		</property>
 	</bean>
