@@ -1,5 +1,7 @@
 package com.bes.ssh.exam.dao.impl;
 
+import java.util.List;
+
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
 import com.bes.ssh.exam.dao.Dao;
@@ -15,4 +17,11 @@ public class DaoImpl extends JdbcDaoSupport implements Dao {
 				+ "','" + password + "')";
 		getJdbcTemplate().execute(sql);
 	}
+
+	@SuppressWarnings("unchecked")
+	public List<? extends Object> get() {
+		String sql = "select * from person";
+		return getJdbcTemplate().queryForList(sql);
+	}
+
 }

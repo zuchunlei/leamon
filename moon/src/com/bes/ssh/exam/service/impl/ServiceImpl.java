@@ -1,5 +1,7 @@
 package com.bes.ssh.exam.service.impl;
 
+import java.util.List;
+
 import com.bes.ssh.exam.dao.Dao;
 import com.bes.ssh.exam.service.Service;
 
@@ -18,4 +20,9 @@ public class ServiceImpl implements Service {
 		dao.add(name, password);
 		System.out.println(10 / 0);
 	}
+
+	public List<? extends Object> get() {
+		return dao.get();
+	}
+
 }
