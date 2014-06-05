@@ -9,12 +9,11 @@
                     ">
 
 	<!-- 本地数据源 -->
-	<bean id="dataSource"
-		class="org.springframework.jdbc.datasource.SingleConnectionDataSource"
-		destroy-method="destroy">
-		<property name="driverClassName" value="org.gjt.mm.mysql.Driver"></property>
-		<property name="url" value="jdbc:mysql://192.168.1.57:3306/test"></property>
-		<property name="username" value="root"></property>
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass" value="org.gjt.mm.mysql.Driver"></property>
+		<property name="jdbcUrl" value="jdbc:mysql://192.168.1.57:3306/test"></property>
+		<property name="user" value="root"></property>
 		<property name="password" value="root"></property>
 	</bean>
 
@@ -38,7 +37,7 @@
 		<property name="transactionAttributes">
 			<props>
 				<prop key="add*">PROPAGATION_REQUIRED</prop>
-				<prop key="get*">readOnly,ISOLATION_READ_COMMITTED</prop>
+				<prop key="get*">readOnly,ISOLATION_READ_UNCOMMITTED</prop>
 			</props>
 		</property>
 	</bean>
