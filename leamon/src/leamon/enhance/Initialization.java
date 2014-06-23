@@ -40,14 +40,18 @@ class Sup {
  */
 class Sub extends Sup {
 
+	private static String SUB_NAME = "Sub";
+
 	static {
 		SUB_NAME = "SUB_NAME";
 	}
 
-	private static String SUB_NAME = "Sub";
-
 	public Sub() {
-		this.name = "denver";
+		// this.name = "denver";
+	}
+
+	{
+		name = "mickey";
 	}
 
 	private String name = "foxli";
