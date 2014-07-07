@@ -140,6 +140,19 @@ public class MinimumHeap {
 		return buffer.toString();
 	}
 
+	/**
+	 * ∂—≈≈–Ú
+	 * 
+	 * @param array
+	 */
+	public static void heapSort(int[] array) {
+		MinimumHeap heap = new MinimumHeap(array);
+
+		for (int i = 0; i < array.length; i++) {
+			array[i] = heap.deleteMin();
+		}
+	}
+
 	public static void main(String[] args) {
 		int[] array = { 9, 10, 7, 6, 3, 1, 8, 4 };
 

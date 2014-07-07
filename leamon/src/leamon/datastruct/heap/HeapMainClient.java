@@ -20,6 +20,8 @@ public class HeapMainClient {
 		}
 
 		System.out.println("numbers中第7小的为:" + result);
-	}
 
+		// numbers已经进行了排序
+		MinimumHeap.heapSort(numbers);
+	}
 }
