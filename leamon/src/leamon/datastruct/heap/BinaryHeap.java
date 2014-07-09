@@ -141,25 +141,35 @@ public class BinaryHeap {
 
 	}
 
+	/**
+	 * 小于比较器
+	 */
 	private static class MinimumComparator implements Compare {
+		private static final MinimumComparator instance = new MinimumComparator();
+
 		@Override
 		public boolean compare(int v1, int v2) {
 			return v1 < v2;
 		}
 
 		public static MinimumComparator instance() {
-			return new MinimumComparator();
+			return instance;
 		}
 	}
 
+	/**
+	 * 大于比较器
+	 */
 	private static class MaximumComparator implements Compare {
+		private static final MaximumComparator instance = new MaximumComparator();;
+
 		@Override
 		public boolean compare(int v1, int v2) {
 			return v1 > v2;
 		}
 
 		public static MaximumComparator instance() {
-			return new MaximumComparator();
+			return instance;
 		}
 	}
 
