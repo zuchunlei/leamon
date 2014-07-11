@@ -25,4 +25,65 @@ public class SortUtils {
 		}
 	}
 
+	/**
+	 * 堆排序
+	 * 
+	 * @param array
+	 */
+	public static void heapSort(int[] array) {
+		// build the max heap
+		for (int i = (array.length - 1) / 2; i >= 0; i--) {
+			percolateDown(array, i, array.length);
+		}
+
+		for (int i = array.length - 1; i > 0; i--) {
+			swap(array, 0, i);
+			percolateDown(array, 0, i);
+		}
+	}
+
+	/**
+	 * 下滤操作
+	 * 
+	 * @param array
+	 *            给定数组
+	 * @param hole
+	 *            下滤起点
+	 * @param size
+	 *            当前堆逻辑大小
+	 */
+	private static void percolateDown(int array[], int hole, int size) {
+		int value = array[hole];
+		int child = -1;
+
+		for (; leftChild(hole) < size; hole = child) {
+			child = leftChild(hole);
+			if (child != size - 1 && array[child + 1] > array[child]) {
+				child++;
+			}
+
+			if (array[child] > value) {
+				array[hole] = array[child];
+			} else {
+				break;
+			}
+		}
+
+		array[hole] = value;
+	}
+
+	private static int leftChild(int hole) {
+		return 2 * hole + 1;
+	}
+
+	private static void swap(int array[], int src, int dest) {
+		if (src >= array.length || dest >= array.length) {
+			String message = "position is beyond the array length!";
+			throw new RuntimeException(message);
+		}
+		int value = array[src];
+		array[src] = array[dest];
+		array[dest] = value;
+	}
+
 }
