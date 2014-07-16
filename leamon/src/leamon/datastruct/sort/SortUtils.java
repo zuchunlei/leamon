@@ -26,6 +26,28 @@ public class SortUtils {
 	}
 
 	/**
+	 * 希尔排序，递减增量排序，是插值排序的一种高效改进版本。
+	 * 
+	 * @param array
+	 */
+	public static void shellSort(int[] array) {
+		int size = array.length;
+
+		// 选定增量，gap为以size一半的方式进行增量
+		for (int gap = size / 2; gap > 0; gap /= 2) {
+			// 从gap到size，对因gap而形成的组分别进行插入排序
+			for (int i = gap; i < size; i++) {
+				int value = array[i];
+				int j = i - gap;
+				for (; j >= 0 && value < array[j]; j -= gap) {
+					array[j + gap] = array[j];
+				}
+				array[j + gap] = value;
+			}
+		}
+	}
+
+	/**
 	 * 堆排序
 	 * 
 	 * @param array
