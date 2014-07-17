@@ -108,4 +108,71 @@ public class SortUtils {
 		array[dest] = value;
 	}
 
+	/**
+	 * 归并排序
+	 * 
+	 * @param array
+	 */
+	public static void mergeSort(int[] array) {
+		int[] tmp = new int[array.length];
+		mergeSort(array, tmp, 0, array.length - 1);
+	}
+
+	/**
+	 * 对给定数组进行分组排序。
+	 * 
+	 * @param array
+	 * @param tmp
+	 * @param left
+	 * @param right
+	 */
+	private static void mergeSort(int[] array, int[] tmp, int left, int right) {
+		if (left < right) {
+			int center = (left + right) / 2;
+			mergeSort(array, tmp, left, center);
+			mergeSort(array, tmp, center + 1, right);
+			merge(array, tmp, left, center + 1, right);
+		}
+	}
+
+	/**
+	 * 归并操作。给定已排序的两个数组进行归并到一个临时数组中。
+	 * 
+	 * @param array
+	 * @param tmp
+	 * @param left
+	 * @param right
+	 * @param end
+	 */
+	private static void merge(int[] array, int[] tmp, int left, int right,
+			int end) {
+
+		int leftPosition = left;
+		int leftEnd = right - 1;
+		int rightPosition = right;
+		int rightEnd = end;
+		int tmpPosition = left;
+
+		while (leftPosition <= leftEnd && rightPosition <= rightEnd) {
+			if (array[leftPosition] < array[rightPosition]) {
+				tmp[tmpPosition++] = array[leftPosition++];
+			} else {
+				tmp[tmpPosition++] = array[rightPosition++];
+			}
+
+		}
+		while (leftPosition <= leftEnd) {
+			tmp[tmpPosition++] = array[leftPosition++];
+		}
+
+		while (rightPosition <= rightEnd) {
+			tmp[tmpPosition++] = array[rightPosition++];
+		}
+
+		while (left <= end) {
+			array[left] = tmp[left];
+			left++;
+		}
+	}
+
 }
