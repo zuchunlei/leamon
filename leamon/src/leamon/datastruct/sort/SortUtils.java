@@ -48,6 +48,45 @@ public class SortUtils {
 	}
 
 	/**
+	 * 快速排序
+	 * 
+	 * @param array
+	 */
+	public static void quickSort(int[] array) {
+		qsort(array, 0, array.length - 1);
+	}
+
+	private static void qsort(int[] array, int begin, int end) {
+		if (end > begin) {
+			int index = partition(array, begin, end);
+			qsort(array, begin, index - 1);
+			qsort(array, index + 1, end);
+		}
+	}
+
+	/**
+	 * 分区算法，选择正确的index，通过分区，保证index左面都是小于pivot，又面都是大于pivot的。
+	 * 
+	 * @param array
+	 * @param begin
+	 * @param end
+	 * @return
+	 */
+	private static int partition(int[] array, int begin, int end) {
+		int index = (begin + end) / 2;
+		int pivot = array[index];
+		swap(array, index, end);
+
+		for (int i = index = begin; i < end; ++i) {// ++i，保证了当前pivot不进行比较操作
+			if (array[i] < pivot) {
+				swap(array, index++, i);
+			}
+		}
+		swap(array, index, end);
+		return index;
+	}
+
+	/**
 	 * 堆排序
 	 * 
 	 * @param array
@@ -159,8 +198,8 @@ public class SortUtils {
 			} else {
 				tmp[tmpPosition++] = array[rightPosition++];
 			}
-
 		}
+
 		while (leftPosition <= leftEnd) {
 			tmp[tmpPosition++] = array[leftPosition++];
 		}
