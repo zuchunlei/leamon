@@ -28,7 +28,17 @@ public class BinaryHeap {
 			this.comparator = MaximumComparator.instance();
 		}
 
-		percolateDown((size - 1) / 2);
+		// percolateDown((size - 1) / 2);
+		buildHeap();
+	}
+
+	/**
+	 * 构建堆，将所有存在孩子的节点进行下滤操作
+	 */
+	private void buildHeap() {
+		for (int i = size / 2 - 1; i >= 0; i--) {
+			percolateDown(i);
+		}
 	}
 
 	public BinaryHeap(int capacity) {
@@ -84,7 +94,7 @@ public class BinaryHeap {
 		array[hole] = value;
 	}
 
-	public int findMin() {
+	public int findTop() {
 		if (isEmpty()) {
 			String message = "current heap is empty!";
 			throw new RuntimeException(message);
@@ -92,21 +102,26 @@ public class BinaryHeap {
 		return array[0];
 	}
 
-	public int deleteMin() {
-		int min = findMin();
+	public int deleteTop() {
+		int value = findTop();
 		array[0] = array[--size];
 		// 下滤
 		percolateDown(0);
-		return min;
+		return value;
+	}
+
+	private int leftChild(int hole) {
+		return 2 * hole + 1;
 	}
 
 	private void percolateDown(int hole) {
 		int child = 0;
 		int value = array[hole];
 
-		for (; 2 * hole + 1 <= size; hole = child) {
-			child = 2 * hole + 1;
-			if (child != size
+		for (; leftChild(hole) < size; hole = child) {
+			child = leftChild(hole);
+
+			if (child != size - 1
 					&& comparator.compare(array[child + 1], array[child])) {
 				child++;
 			}
@@ -136,7 +151,7 @@ public class BinaryHeap {
 		}
 
 		while (heap.size() > 0) {
-			System.out.println(heap.deleteMin());
+			System.out.println(heap.deleteTop());
 		}
 
 	}
