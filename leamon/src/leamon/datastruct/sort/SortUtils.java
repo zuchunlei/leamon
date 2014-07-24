@@ -231,4 +231,25 @@ public class SortUtils {
 		}
 	}
 
+	/**
+	 * 选择排序，保证每趟操作后，找到数组中最小的数据放在合适的位置
+	 * 
+	 * @param array
+	 */
+	public static void selectionSort(int[] array) {
+		for (int i = 0; i < array.length; i++) {
+			int minIndex = i;
+
+			for (int j = i + 1; j < array.length; j++) {
+				if (array[j] < array[minIndex]) {
+					minIndex = j;
+				}
+			}
+
+			if (minIndex != i) {
+				swap(array, minIndex, i);
+			}
+		}
+	}
+
 }
