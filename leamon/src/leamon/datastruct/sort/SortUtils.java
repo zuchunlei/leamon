@@ -214,4 +214,21 @@ public class SortUtils {
 		}
 	}
 
+	/**
+	 * 冒泡排序，通过每一趟的比较交换，保证位置i到array.length之间的数据有序
+	 * 
+	 * @param array
+	 */
+	public static void bubbleSort(int[] array) {
+		// 变量i用来对输入的数组进行分区
+		for (int i = array.length - 1; i > 0; i--) {
+			// 通过比较交换，保证[j--i]之间的数据有序性
+			for (int j = 0; j < i; j++) {
+				if (array[j + 1] < array[j]) {
+					swap(array, j, j + 1);
+				}
+			}
+		}
+	}
+
 }
