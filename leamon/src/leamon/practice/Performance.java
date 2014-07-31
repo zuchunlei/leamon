@@ -1,6 +1,7 @@
 package leamon.practice;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ public class Performance {
 		new Thread(new MemoryTask(), "memory task").start();
 		new Thread(new CalculateTask(), "calculate task").start();
 		new Thread(new IOTask(), "io task").start();
+		new Thread(new CopyTask(), "copy task").start();
 	}
 
 	/**
@@ -65,6 +67,30 @@ public class Performance {
 					in.write(data);
 				}
 				in.close();
+			} catch (Exception e) {
+				// ignore
+			}
+		}
+	}
+
+	/**
+	 * Copy»ŒŒÒ
+	 */
+	static class CopyTask implements Runnable {
+		@Override
+		public void run() {
+			try {
+				FileInputStream in = new FileInputStream("src.txt");
+				FileOutputStream out = new FileOutputStream("dest.txt");
+				byte[] buffer = new byte[2048];
+				int len = 0;
+
+				while ((len = in.read(buffer)) != 0) {
+					out.write(buffer, 0, len);
+				}
+
+				in.close();
+				out.close();
 			} catch (Exception e) {
 				// ignore
 			}
