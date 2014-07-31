@@ -29,9 +29,18 @@ public class HashMapTester {
 		}
 
 		@Override
+		public int hashCode() {
+			return 0;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			return obj instanceof Person;
+		}
+
+		@Override
 		public String toString() {
 			return String.valueOf(id);
 		}
-
 	}
 }
