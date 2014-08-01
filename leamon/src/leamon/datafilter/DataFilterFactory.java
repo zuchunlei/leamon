@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * 数据过滤器构建工厂
@@ -29,6 +30,16 @@ public class DataFilterFactory {
 	}
 
 	/**
+	 * 当前给定的符号是否为注册的操作符
+	 * 
+	 * @param str
+	 * @return
+	 */
+	private static boolean isOperator(String str) {
+		return operators.containsKey(str);
+	}
+
+	/**
 	 * 根据给定的规则表达式，构建数据过滤器对象
 	 * 
 	 * @param express
@@ -42,6 +53,7 @@ public class DataFilterFactory {
 		}
 
 		List<String> infixList = split(express, heap);
+		List<String> suffixList = parse(infixList);
 		return null;
 	}
 
@@ -100,6 +112,47 @@ public class DataFilterFactory {
 		}
 
 		return result;
+	}
+
+	/**
+	 * 根据字符串的中序遍历形式以及操作符的优先级进行解析，返回其后缀字符串
+	 * 
+	 * @param infixList
+	 * @return
+	 */
+	private static List<String> parse(List<String> infixList) {
+		List<String> suffixList = new ArrayList<String>();
+		Stack<Operator> stack = new Stack<Operator>();
+
+		for (String str : infixList) {
+			if (isOperator(str)) {
+				Operator current = operators.get(str);
+
+				if (current.isMatch()) {// 匹配操作符，一般为右括号
+					while (!stack.isEmpty()
+							&& !current.match(stack.peek().getDescription())) {
+						suffixList.add(stack.pop().getDescription());
+					}
+
+					stack.pop();// 弹出"("
+				} else {// 普通操作符
+					while (!stack.isEmpty()
+							&& current.underPriority(stack.peek())) {
+						suffixList.add(stack.pop().getDescription());
+					}
+
+					stack.push(current);
+				}
+			} else {
+				suffixList.add(str);
+			}
+		}
+
+		while (!stack.isEmpty()) {
+			suffixList.add(stack.pop().getDescription());
+		}
+
+		return suffixList;
 	}
 
 	/**
