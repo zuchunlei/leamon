@@ -28,7 +28,7 @@ public class LogicDataFilter implements DataFilter {
 	}
 
 	@Override
-	public boolean doFilter(Map<Object, Object> dataMap) {
+	public boolean doFilter(Map<String, Object> dataMap) {
 		boolean leftValue = left.doFilter(dataMap);
 		boolean rightValue = right.doFilter(dataMap);
 

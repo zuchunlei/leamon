@@ -16,7 +16,7 @@ public class BasicDataFilter implements DataFilter {
 	}
 
 	@Override
-	public boolean doFilter(Map<Object, Object> dataMap) {
+	public boolean doFilter(Map<String, Object> dataMap) {
 		return dataMap.containsKey(express);
 	}
 

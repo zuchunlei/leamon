@@ -13,6 +13,6 @@ public interface DataFilter {
 	 * @param dataMap
 	 * @return
 	 */
-	public boolean doFilter(Map<Object, Object> dataMap);
+	public boolean doFilter(Map<String, Object> dataMap);
 
 }
