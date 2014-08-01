@@ -106,12 +106,10 @@ public class DataFilterFactory {
 
 		Object[] array = set.toArray();
 
-		int i = 0;
-		while (i < array.length - 1) {
+		for (int i = 0, length = array.length; i < length - 1; i++) {
 			int begin = (Integer) array[i];
 			int end = (Integer) array[i + 1];
 			result.add(express.substring(begin, end));
-			i++;
 		}
 
 		return result;
