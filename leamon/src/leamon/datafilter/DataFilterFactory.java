@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import leamon.datafilter.filters.BasicDataFilter;
+import leamon.datafilter.filters.LogicDataFilter;
+
 /**
  * 数据过滤器构建工厂
  */
@@ -54,7 +57,7 @@ public class DataFilterFactory {
 
 		List<String> infixList = split(express, heap);
 		List<String> suffixList = parse(infixList);
-		return null;
+		return build(suffixList);
 	}
 
 	/**
@@ -153,6 +156,31 @@ public class DataFilterFactory {
 		}
 
 		return suffixList;
+	}
+
+	/**
+	 * 根据给定的后缀字符串构建数据过滤器对象
+	 * 
+	 * @param suffixList
+	 * @return
+	 */
+	private static DataFilter build(List<String> suffixList) {
+		Stack<DataFilter> stack = new Stack<DataFilter>();
+
+		for (String str : suffixList) {
+			if (isOperator(str)) {
+				Operator op = operators.get(str);
+				LogicDataFilter node = new LogicDataFilter(op);
+				node.setRight(stack.pop());
+				node.setLeft(stack.pop());
+				stack.push(node);
+			} else {
+				BasicDataFilter node = new BasicDataFilter(str);
+				stack.push(node);
+			}
+		}
+
+		return stack.pop();
 	}
 
 	/**
