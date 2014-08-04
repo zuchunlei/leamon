@@ -1,6 +1,7 @@
 package leamon.datafilter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -49,13 +50,13 @@ public class DataFilterFactory {
 	 * @return
 	 */
 	public static DataFilter buildDataFilter(String express) {
-		ParseNodeHeap heap = new ParseNodeHeap();
+		List<ParseNode> list = new ArrayList<ParseNode>();
 
 		for (String operator : operators.keySet()) {
-			extract(express, operator, 0, heap);
+			extract(express, operator, 0, list);
 		}
 
-		List<String> infixList = split(express, heap);
+		List<String> infixList = split(express, list);
 		List<String> suffixList = parse(infixList);
 		return build(suffixList);
 	}
@@ -66,17 +67,17 @@ public class DataFilterFactory {
 	 * @param express
 	 * @param pattern
 	 * @param start
-	 * @param heap
+	 * @param list
 	 */
 	private static void extract(String express, String pattern, int start,
-			ParseNodeHeap heap) {
+			List<ParseNode> list) {
 
 		int length = pattern.length();
 		int index = express.indexOf(pattern, start);
 
 		while (index != -1) {
 			ParseNode node = new ParseNode(index, length);
-			heap.add(node);
+			list.add(node);
 
 			start = index + length;
 			index = express.indexOf(pattern, start);
@@ -87,16 +88,18 @@ public class DataFilterFactory {
 	 * 分割方法，将给定的表达式根据操作符进行分割
 	 * 
 	 * @param express
-	 * @param heap
+	 * @param list
 	 * @return
 	 */
-	private static List<String> split(String express, ParseNodeHeap heap) {
+	private static List<String> split(String express, List<ParseNode> list) {
+		Collections.sort(list);
+
 		List<String> result = new ArrayList<String>();
 
 		LinkedHashSet<Integer> set = new LinkedHashSet<Integer>();
 		set.add(0);
-		for (int i = 0, size = heap.size(); i < size; i++) {
-			ParseNode node = heap.deleteMin();
+		for (int i = 0, size = list.size(); i < size; i++) {
+			ParseNode node = list.get(i);
 			int index = node.index;
 			int end = index + node.length;
 			set.add(index);
@@ -199,95 +202,4 @@ public class DataFilterFactory {
 		}
 	}
 
-	/**
-	 * ParseNode的最小堆实现
-	 */
-	private static class ParseNodeHeap {
-		private static final int DEFAULT_CAPACITY = 10;
-
-		private ParseNode[] array;
-		private int size;
-
-		public ParseNodeHeap() {
-			this(DEFAULT_CAPACITY);
-		}
-
-		public ParseNodeHeap(int capacity) {
-			this.size = 0;
-			this.array = new ParseNode[capacity];
-		}
-
-		private void enlarge(int capacity) {
-			ParseNode[] tmp = new ParseNode[capacity];
-			System.arraycopy(array, 0, tmp, 0, size - 1);
-			array = tmp;
-		}
-
-		public int size() {
-			return size;
-		}
-
-		public boolean isEmpty() {
-			return size == 0;
-		}
-
-		public ParseNode findMin() {
-			if (isEmpty()) {
-				String message = "current heap is empty;";
-				throw new RuntimeException(message);
-			}
-
-			return array[0];
-		}
-
-		public void add(ParseNode node) {
-			if (size == array.length) {
-				enlarge(2 * size);
-			}
-			array[size] = node;
-			percolateUp(size++);
-		}
-
-		private void percolateUp(int hole) {
-			ParseNode node = array[hole];
-			for (; hole > 0 && array[(hole - 1) / 2].compareTo(node) > 0; hole = (hole - 1) / 2) {
-				array[hole] = array[(hole - 1) / 2];
-			}
-			array[hole] = node;
-		}
-
-		public ParseNode deleteMin() {
-			ParseNode node = findMin();
-
-			array[0] = array[--size];
-			percolateDown(0);
-			return node;
-		}
-
-		private void percolateDown(int hole) {
-			ParseNode node = array[hole];
-			int child = -1;
-			for (; leftChild(hole) < size; hole = child) {
-				child = leftChild(hole);
-
-				if (child != size - 1
-						&& array[child + 1].compareTo(array[child]) < 0) {
-					child++;
-				}
-
-				if (array[child].compareTo(node) < 0) {
-					array[hole] = array[child];
-				} else {
-					break;
-				}
-
-			}
-			array[hole] = node;
-
-		}
-
-		private int leftChild(int hole) {
-			return 2 * hole + 1;
-		}
-	}
 }
