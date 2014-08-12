@@ -46,6 +46,8 @@ class Sub extends Sup {
 		SUB_NAME = "SUB_NAME";
 	}
 
+	private String interest = "exploration";
+
 	public Sub() {
 		// this.name = "denver";
 	}
@@ -60,6 +62,7 @@ class Sub extends Sup {
 		super.info();
 		System.out.println("Sub_Name is " + SUB_NAME);
 		System.out.println("name is " + this.name);
+		System.out.println("interest is " + this.interest);
 	}
 
 }
