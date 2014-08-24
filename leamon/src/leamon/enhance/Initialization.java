@@ -16,6 +16,8 @@ public class Initialization {
  */
 class Sup {
 
+	public static final float VERSION = 1.0f;// ±‡“Î ±≥£¡ø
+
 	private static String SUP_NAME = "Sup";
 
 	static {
