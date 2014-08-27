@@ -1,7 +1,7 @@
-package com.bes.ssh.xa.jotm.service.impl;
+package com.bes.ssh.xa.service.impl;
 
-import com.bes.ssh.xa.jotm.dao.Dao;
-import com.bes.ssh.xa.jotm.service.Service;
+import com.bes.ssh.xa.dao.Dao;
+import com.bes.ssh.xa.service.Service;
 
 public class ServiceImpl implements Service {
 

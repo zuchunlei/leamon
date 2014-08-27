@@ -1,4 +1,4 @@
-package com.bes.ssh.xa.jotm.dao;
+package com.bes.ssh.xa.dao;
 
 public interface Dao {
 	public void add(String name, String password);

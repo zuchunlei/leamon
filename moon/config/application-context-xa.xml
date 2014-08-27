@@ -82,13 +82,13 @@
 		</property>
 	</bean>
 
-	<bean id="localDao" class="com.bes.ssh.xa.jotm.dao.impl.LocalDaoImpl">
+	<bean id="localDao" class="com.bes.ssh.xa.dao.impl.LocalDaoImpl">
 		<property name="dataSource">
 			<ref local="localDS" />
 		</property>
 	</bean>
 
-	<bean id="remoteDao" class="com.bes.ssh.xa.jotm.dao.impl.RemoteDaoImpl">
+	<bean id="remoteDao" class="com.bes.ssh.xa.dao.impl.RemoteDaoImpl">
 		<property name="dataSource">
 			<ref local="remoteDS" />
 		</property>
@@ -96,7 +96,7 @@
 
 	<bean id="service" parent="transactionConfigTemplet">
 		<property name="target">
-			<bean class="com.bes.ssh.xa.jotm.service.impl.ServiceImpl">
+			<bean class="com.bes.ssh.xa.service.impl.ServiceImpl">
 				<property name="localDao">
 					<ref local="localDao" />
 				</property>

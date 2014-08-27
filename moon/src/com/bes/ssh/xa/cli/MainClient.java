@@ -1,9 +1,9 @@
-package com.bes.ssh.xa.jotm.cli;
+package com.bes.ssh.xa.cli;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.bes.ssh.xa.jotm.service.Service;
+import com.bes.ssh.xa.service.Service;
 
 public class MainClient {
 	public static void main(String[] args) {
