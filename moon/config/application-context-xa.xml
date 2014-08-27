@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                    ">
+
+	<!-- JOTM事务 -->
+	<bean id="jotm" class="org.springframework.transaction.jta.JotmFactoryBean"
+		destroy-method="destroy" />
+
+	<!-- JTA事务管理器 -->
+	<bean id="transactionManager"
+		class="org.springframework.transaction.jta.JtaTransactionManager">
+		<property name="userTransaction">
+			<ref local="jotm" />
+		</property>
+	</bean>
+
+	<!-- 本地数据源 -->
+	<bean id="localDS" class="org.enhydra.jdbc.pool.StandardXAPoolDataSource">
+		<property name="dataSource">
+			<bean class="org.enhydra.jdbc.standard.StandardXADataSource">
+				<property name="transactionManager">
+					<ref local="jotm" />
+				</property>
+				<property name="driverName">
+					<value>com.mysql.jdbc.Driver</value>
+				</property>
+				<property name="url">
+					<value>jdbc:mysql://127.0.0.1:3306/test</value>
+				</property>
+			</bean>
+		</property>
+		<property name="user">
+			<value>root</value>
+		</property>
+		<property name="password">
+			<value></value>
+		</property>
+	</bean>
+
+	<!-- 远程数据源 -->
+	<bean id="remoteDS" class="org.enhydra.jdbc.pool.StandardXAPoolDataSource">
+		<property name="dataSource">
+			<bean class="org.enhydra.jdbc.standard.StandardXADataSource">
+				<property name="transactionManager">
+					<ref local="jotm" />
+				</property>
+				<property name="driverName">
+					<value>com.mysql.jdbc.Driver</value>
+				</property>
+				<property name="url">
+					<value>jdbc:mysql://192.168.1.57:3306/test</value>
+				</property>
+			</bean>
+		</property>
+		<property name="user">
+			<value>root</value>
+		</property>
+		<property name="password">
+			<value>root</value>
+		</property>
+	</bean>
+
+	<!-- 事务配置模板，所有的事务代理对象均复用该模板 -->
+	<bean id="transactionConfigTemplet"
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+		abstract="true">
+		<!-- 事务管理器 -->
+		<property name="transactionManager">
+			<ref local="transactionManager" />
+		</property>
+		<!-- 事务属性 -->
+		<property name="transactionAttributes">
+			<props>
+				<prop key="add*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
+</beans>
