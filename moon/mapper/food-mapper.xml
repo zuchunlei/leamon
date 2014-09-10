@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper 
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bes.ssh.ibatis.dao.FoodDao">
+
+	<insert id="addFood" parameterType="Food">
+		insert into food(name,price)
+		values (#{name},#{price})
+	</insert>
+
+	<select id="getFood" parameterType="java.lang.String"
+		resultType="Food">
+		select * from food where id=#{id}
+	</select>
+
+</mapper>
