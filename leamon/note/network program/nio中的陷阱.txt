@@ -31,3 +31,18 @@ OP_ACCEPT就绪事件应该由Acceptor来消费，accept()返回的SocketChannel交与Poller来处
 1、基于界定符，消息的结束有一组唯一的标记标识，这个特殊的标识不能出现在发送的数据中。
 2、显式长度，在变长的发送数据中，显式在数据头部写入该数据的长度。
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+现象：不正确的OP_WRITE注册时机，导致CPU运行100%？（NIO中OP_WRITE的正确注册方式）
+对于SocketChannel.write(ByteBuffer)的调用，可以在未将SocketChannel注册到Selector关注OP_WRITE之前调用，如果一次write操作并未将Buffer中的数据
+全部写入，则可以按次数循环写入。
+如果本地SocketChannel中的SEND_Q已满，则write操作返回0，规定写入次数退化到0后，可将该SocketChannel更改为兴趣写。
+SelectionKey.interestOps(SelectionKey.interestOps |SelectionKey.OP_WRITE)，在Selector的下次选择周期中进行写入操作。
+【SocketChannel的何时可写：本地SEND_Q中有空间，则OP_WRITE立即就绪。本地SEND_Q中已满，则该SocketChannel不可写。】
+如果将ByteBuffer中的数据（应用层）完全写入SEND_Q（内核层）中，则应该立即调用SelectionKey.interestOps(SelectionKey.interestOps & ~SelectionKey.OP_WRITE)
+取消对SocketChannel的兴趣写。否则，因为本地SEND_Q未满，导致Selector.select()立即返回，CPU运行100%。
+
+结论-在客户的一次请求周期中，将响应数据write到客户端。如果在规定的次数下，ByteBuffer中仍然存在未发送完全的数据（可能SEND_Q已满），则SocketChannel注册兴趣写，
+	在一个选择周期中进行write。如果应用层数据完全写入到了SEND_Q中，则应该立即取消兴趣写。
+
+【SelectionKey.interestOps(SelectionKey.interestOps | SelectionKey.OP_WRITE) 注册兴趣写】
+【SelectionKey.interestOps(SelectionKey.interestOps & ~SelectionKey.OP_WRITE) 取消兴趣写】
