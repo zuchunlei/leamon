@@ -26,9 +26,17 @@ public class IOSession {
 
 	private IOFilterChain chain;// IO过滤链
 
-	public IOSession(SelectionKey key, Poller poller) {
-		this.key = key;
-		this.channel = (SocketChannel) key.channel();
+	// public IOSession(SelectionKey key, Poller poller) {
+	// this.key = key;
+	// this.channel = (SocketChannel) key.channel();
+	// this.poller = poller;
+	// this.inReading = new AtomicBoolean();// 默认为false
+	// this.buffer = ByteBuffer.allocate(DEFAULT_SIZE);
+	// }
+
+	public IOSession(SocketChannel channel, Poller poller) {
+		this.channel = channel;
+		this.key = channel.keyFor(poller.getSelector());
 		this.poller = poller;
 		this.inReading = new AtomicBoolean();// 默认为false
 		this.buffer = ByteBuffer.allocate(DEFAULT_SIZE);

@@ -241,12 +241,14 @@ public class Server {
 								// 创建IOSession对象，该对象内部封装了具体的IO读写逻辑，以及业务处理的逻辑。
 								IOSession session = (IOSession) key
 										.attachment();
-								if (session == null) {
-									session = new IOSession(key, this);
-									// 设置业务处理链
-									session.setChain(getIOFilterChain());
-									key.attach(session);
-								}
+
+								// if (session == null) {
+								// session = new IOSession(key, this);
+								// session.setChain(getIOFilterChain());//
+								// 设置业务处理链
+								// key.attach(session);
+								// }
+
 								// 取消兴趣读，读数据，业务处理，注册兴趣写。
 								unRegisterRead(key);// 取消所有兴趣关注点
 
@@ -374,12 +376,16 @@ public class Server {
 		void registerChannel(SocketChannel channel) {
 			// channels.offer(channel);
 			final SocketChannel sc = channel;
+			final Poller poller = this;
 			events.add(new Runnable() {
 				@Override
 				public void run() {
 					try {
 						sc.configureBlocking(false);
-						sc.register(selector, SelectionKey.OP_READ);
+						// sc.register(selector, SelectionKey.OP_READ);
+						IOSession session = new IOSession(sc, poller);
+						session.setChain(getIOFilterChain());// 设置业务处理链
+						sc.register(selector, SelectionKey.OP_READ, session);// 将IOSession与SocketChannel进行关联，注册到Poller中
 					} catch (IOException e) {
 						// ignore
 					}
