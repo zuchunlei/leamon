@@ -41,16 +41,71 @@ public class TransportObject implements Serializable {
 		this.id = id;
 	}
 
+	/**
+	 * 成员内部类（非静态）
+	 */
+	class CommonInnerObject implements Serializable {
+		private static final long serialVersionUID = 1031648876487968082L;
+
+		private long version;
+		private String description;
+
+		public CommonInnerObject(long version, String description) {
+			this.version = version;
+			this.description = description;
+		}
+
+		public long getVersion() {
+			return version;
+		}
+
+		public String getDescription() {
+			return description;
+		}
+	}
+
+	/**
+	 * 静态内部类
+	 */
+	static class StaticInnerObject implements Serializable {
+		private static final long serialVersionUID = -3773312243815260813L;
+
+		private int age;
+		private String name;
+
+		public StaticInnerObject(int age, String name) {
+			this.age = age;
+			this.name = name;
+		}
+
+		public int getAge() {
+			return age;
+		}
+
+		public String getName() {
+			return name;
+		}
+	}
+
 	public static void main(String[] args) throws Exception {
 		TransportObject obj = new TransportObject();
 		obj.setId(100);
 		obj.setAge(29);
 		obj.setName("zuchunlei");
 
+		// 成员内部类对象的创建需要外围类的对象实例
+		CommonInnerObject commonInnerObject = obj.new CommonInnerObject(1,
+				"this is a test");
+
+		// 静态内部类对象的创建不需要外围类的对象实例
+		StaticInnerObject staticInnerObject = new StaticInnerObject(29, "panda");
+
 		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(
 				"D:/2.txt"));
 
-		out.writeObject(obj);
+		out.writeObject(commonInnerObject);
+		out.writeObject(staticInnerObject);
+
 		out.close();
 	}
 }
