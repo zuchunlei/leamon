@@ -101,8 +101,18 @@ public class TransportObject implements Serializable {
 		StaticInnerObject staticInnerObject = new StaticInnerObject(29, "panda");
 
 		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(
-				"D:/2.txt"));
+				"D:/3.txt"));
 
+		out.writeObject(commonInnerObject);
+		out.writeObject(staticInnerObject);
+
+		// 在对commonInnerObject与staticInnerObject对象writeObject后，修改其对象的内部状态
+		commonInnerObject.description = "test is a test";
+		commonInnerObject.version = 2;
+		staticInnerObject.age = 30;
+		staticInnerObject.name = "foxli";
+
+		// 再对commonInnerObject与staticInnerObject对象进行writeObject调用进行序列化操作
 		out.writeObject(commonInnerObject);
 		out.writeObject(staticInnerObject);
 
