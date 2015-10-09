@@ -11,14 +11,14 @@ import java.net.Socket;
  */
 public class SockOption {
 
-	public static void main(String[] args) throws Exception {
-		ServerSocket servSock = new ServerSocket(5000);
-		servSock.setReceiveBufferSize(4096);
-		Socket sock = servSock.accept();
-		System.out.println(sock.getReceiveBufferSize());
+    public static void main(String[] args) throws Exception {
+        ServerSocket servSock = new ServerSocket(5000);
+        servSock.setReceiveBufferSize(4096);
+        Socket sock = servSock.accept();
+        System.out.println(sock.getReceiveBufferSize());
 
-		sock.setReceiveBufferSize(8192);
-		System.out.println(sock.getReceiveBufferSize());
-	}
+        sock.setReceiveBufferSize(8192);
+        System.out.println(sock.getReceiveBufferSize());
+    }
 
 }

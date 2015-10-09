@@ -11,25 +11,25 @@ import java.nio.channels.SocketChannel;
  */
 public class Connector {
 
-	public static void main(String[] args) throws Exception {
-		Selector selector = Selector.open();
+    public static void main(String[] args) throws Exception {
+        Selector selector = Selector.open();
 
-		// 调用无参数的open(),将返回的信道配置为非阻塞的
-		SocketChannel sockChannel = SocketChannel.open();
-		sockChannel.configureBlocking(false);
+        // 调用无参数的open(),将返回的信道配置为非阻塞的
+        SocketChannel sockChannel = SocketChannel.open();
+        sockChannel.configureBlocking(false);
 
-		// 通过给定的host/port尝试去连接远程主机，
-		sockChannel.connect(new InetSocketAddress("baidu.com", 80));
-		// 如果该连接处于pending状态，重复去连接
-		boolean connected = false;
-		while (sockChannel.isConnectionPending() && !connected) {
-			connected = sockChannel.finishConnect();
-		}
+        // 通过给定的host/port尝试去连接远程主机，
+        sockChannel.connect(new InetSocketAddress("baidu.com", 80));
+        // 如果该连接处于pending状态，重复去连接
+        boolean connected = false;
+        while (sockChannel.isConnectionPending() && !connected) {
+            connected = sockChannel.finishConnect();
+        }
 
-		// 返回的是SocketAdaptor
-		Socket socket = sockChannel.socket();
-		System.out.println(socket);
+        // 返回的是SocketAdaptor
+        Socket socket = sockChannel.socket();
+        System.out.println(socket);
 
-		sockChannel.register(selector, SelectionKey.OP_CONNECT);
-	}
+        sockChannel.register(selector, SelectionKey.OP_CONNECT);
+    }
 }

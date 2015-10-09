@@ -5,10 +5,10 @@ package leamon.expression;
  */
 public interface CalculateUnit {
 
-	/**
-	 * 运算操作，返回运算结果
-	 * 
-	 * @return
-	 */
-	double calculate();
+    /**
+     * 运算操作，返回运算结果
+     * 
+     * @return
+     */
+    double calculate();
 }

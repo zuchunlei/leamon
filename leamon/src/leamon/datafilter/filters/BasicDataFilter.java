@@ -9,15 +9,15 @@ import leamon.datafilter.DataFilter;
  */
 public class BasicDataFilter implements DataFilter {
 
-	private String express;
+    private String express;
 
-	public BasicDataFilter(String express) {
-		this.express = express;
-	}
+    public BasicDataFilter(String express) {
+        this.express = express;
+    }
 
-	@Override
-	public boolean doFilter(Map<String, Object> dataMap) {
-		return dataMap.containsKey(express);
-	}
+    @Override
+    public boolean doFilter(Map<String, Object> dataMap) {
+        return dataMap.containsKey(express);
+    }
 
 }

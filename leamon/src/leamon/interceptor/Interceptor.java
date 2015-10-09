@@ -5,6 +5,6 @@ package leamon.interceptor;
  */
 public interface Interceptor {
 
-	void invoke(final MessagePacket packet, InterceptorChain chian);
-	
+    void invoke(final MessagePacket packet, InterceptorChain chian);
+
 }

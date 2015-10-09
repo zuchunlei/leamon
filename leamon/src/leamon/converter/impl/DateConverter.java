@@ -10,21 +10,21 @@ import leamon.converter.Converter;
  */
 public class DateConverter extends Converter<Date> {
 
-	private SimpleDateFormat formater;// 日期格式化器
+    private SimpleDateFormat formater;// 日期格式化器
 
-	public DateConverter(String pattern) {
-		this.formater = new SimpleDateFormat(pattern);
-	}
+    public DateConverter(String pattern) {
+        this.formater = new SimpleDateFormat(pattern);
+    }
 
-	@Override
-	protected Date doConverte(String value) {
-		Date result = null;
-		try {
-			result = formater.parse(value);
-		} catch (Exception e) {
-			// ignore
-		}
-		return result;
-	}
+    @Override
+    protected Date doConverte(String value) {
+        Date result = null;
+        try {
+            result = formater.parse(value);
+        } catch (Exception e) {
+            // ignore
+        }
+        return result;
+    }
 
 }

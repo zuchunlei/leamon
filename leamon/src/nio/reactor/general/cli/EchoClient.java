@@ -12,43 +12,42 @@ import java.net.Socket;
  */
 public class EchoClient {
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
 
-		Runnable task = new Runnable() {
-			@Override
-			public void run() {
-				while (true) {
-					try {
-						Socket socket = new Socket();
-						socket.connect(new InetSocketAddress("192.168.1.35",
-								12345));
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Socket socket = new Socket();
+                        socket.connect(new InetSocketAddress("192.168.1.35", 12345));
 
-						String data = "zuchunlei!";
-						byte[] content = data.getBytes();
+                        String data = "zuchunlei!";
+                        byte[] content = data.getBytes();
 
-						// Echo请求
-						OutputStream os = socket.getOutputStream();
-						DataOutputStream out = new DataOutputStream(os);
-						out.writeInt(content.length);
-						out.write(content);
+                        // Echo请求
+                        OutputStream os = socket.getOutputStream();
+                        DataOutputStream out = new DataOutputStream(os);
+                        out.writeInt(content.length);
+                        out.write(content);
 
-						// Echo响应
-						InputStream in = socket.getInputStream();
+                        // Echo响应
+                        InputStream in = socket.getInputStream();
 
-						byte[] buffer = new byte[128];
-						int length = in.read(buffer);
-						System.out.println(new String(buffer, 0, length));
-						socket.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
+                        byte[] buffer = new byte[128];
+                        int length = in.read(buffer);
+                        System.out.println(new String(buffer, 0, length));
+                        socket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
 
-			}
-		};
+            }
+        };
 
-		for (int i = 0; i < 100; i++) {
-			new Thread(task).start();
-		}
-	}
+        for (int i = 0; i < 100; i++) {
+            new Thread(task).start();
+        }
+    }
 }

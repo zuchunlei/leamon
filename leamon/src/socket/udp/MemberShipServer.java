@@ -7,12 +7,12 @@ import socket.udp.multicast.Member;
  */
 public class MemberShipServer {
 
-	/**
-	 * 获得其它同级节点Member的列表数组
-	 * 
-	 * @return
-	 */
-	public Member[] getMembers() {
-		return null;
-	}
+    /**
+     * 获得其它同级节点Member的列表数组
+     * 
+     * @return
+     */
+    public Member[] getMembers() {
+        return null;
+    }
 }

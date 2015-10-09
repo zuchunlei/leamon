@@ -2,17 +2,17 @@ package network;
 
 public interface Test {
 
-	void a();
+    void a();
 
-	void b();
+    void b();
 
-	Test test = new Test() {
-		public void b() {
-		}
+    Test test = new Test() {
+        public void b() {
+        }
 
-		public void a() {
+        public void a() {
 
-		}
-	};
+        }
+    };
 
 }

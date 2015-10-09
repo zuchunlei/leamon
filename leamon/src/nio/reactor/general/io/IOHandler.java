@@ -7,12 +7,12 @@ import nio.reactor.general.data.DataPacket;
  */
 public interface IOHandler {
 
-	/**
-	 * 应用层数据处理
-	 * 
-	 * @param packet
-	 * @return
-	 */
-	DataPacket handle(DataPacket packet);
+    /**
+     * 应用层数据处理
+     * 
+     * @param packet
+     * @return
+     */
+    DataPacket handle(DataPacket packet);
 
 }

@@ -8,12 +8,12 @@ import leamon.interceptor.MessagePacket;
  */
 public class CompressInterceptor extends InterceptorAdapter {
 
-	/**
-	 * 对数据包进行压缩处理
-	 * 
-	 * @param packet
-	 */
-	@Override
-	protected void doInvoke(MessagePacket packet) {
-	}
+    /**
+     * 对数据包进行压缩处理
+     * 
+     * @param packet
+     */
+    @Override
+    protected void doInvoke(MessagePacket packet) {
+    }
 }

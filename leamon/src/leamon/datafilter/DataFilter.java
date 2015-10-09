@@ -7,12 +7,12 @@ import java.util.Map;
  */
 public interface DataFilter {
 
-	/**
-	 * 对dataMap进行过滤操作，只有Map中的数据满足规则过滤通过
-	 * 
-	 * @param dataMap
-	 * @return
-	 */
-	public boolean doFilter(Map<String, Object> dataMap);
+    /**
+     * 对dataMap进行过滤操作，只有Map中的数据满足规则过滤通过
+     * 
+     * @param dataMap
+     * @return
+     */
+    public boolean doFilter(Map<String, Object> dataMap);
 
 }

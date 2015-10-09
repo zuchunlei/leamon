@@ -2,11 +2,11 @@ package leamon.io;
 
 public interface IoService {
 
-	void read();
+    void read();
 
-	void write();
+    void write();
 
-	void addFilter(IoFilter filter);
+    void addFilter(IoFilter filter);
 
-	void removeFilter(IoFilter filter);
+    void removeFilter(IoFilter filter);
 }

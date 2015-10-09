@@ -10,17 +10,17 @@ import java.nio.charset.CharsetDecoder;
  */
 public class CharsetTester {
 
-	public static void main(String[] args) throws Exception {
-		ByteBuffer buffer = ByteBuffer.allocate(100);
-		buffer.clear();
-		buffer.put("×æ´ºÀ×".getBytes());
-		buffer.flip();
+    public static void main(String[] args) throws Exception {
+        ByteBuffer buffer = ByteBuffer.allocate(100);
+        buffer.clear();
+        buffer.put("×æ´ºÀ×".getBytes());
+        buffer.flip();
 
-		Charset charset = Charset.forName("gbk");
-		CharsetDecoder decoder = charset.newDecoder();
-		CharBuffer charbuffer = decoder.decode(buffer);
+        Charset charset = Charset.forName("gbk");
+        CharsetDecoder decoder = charset.newDecoder();
+        CharBuffer charbuffer = decoder.decode(buffer);
 
-		System.out.println(charbuffer.array());
+        System.out.println(charbuffer.array());
 
-	}
+    }
 }

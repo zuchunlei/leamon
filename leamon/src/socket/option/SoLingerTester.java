@@ -13,22 +13,22 @@ import java.net.Socket;
  */
 public class SoLingerTester {
 
-	public static void main(String[] args) throws IOException {
-		Socket sock = new Socket();
-		// 设置socket选项soliger，默认为false
-		sock.setSoLinger(true, 100);
+    public static void main(String[] args) throws IOException {
+        Socket sock = new Socket();
+        // 设置socket选项soliger，默认为false
+        sock.setSoLinger(true, 100);
 
-		sock.connect(new InetSocketAddress("localhost", 12345));
+        sock.connect(new InetSocketAddress("localhost", 12345));
 
-		OutputStream out = sock.getOutputStream();
-		// 发送大量的字节数据
-		for (int i = 0; i < 10000; i++) {
-			out.write("zu_chunlei".getBytes());
-		}
-		// 关闭该socket对象，测试如果Send-Q存在未发送完全的数据时，是否阻塞等待。
-		// 确实阻塞到指定时间后关闭
-		long time = System.currentTimeMillis();
-		sock.close();
-		System.out.println(System.currentTimeMillis() - time);
-	}
+        OutputStream out = sock.getOutputStream();
+        // 发送大量的字节数据
+        for (int i = 0; i < 10000; i++) {
+            out.write("zu_chunlei".getBytes());
+        }
+        // 关闭该socket对象，测试如果Send-Q存在未发送完全的数据时，是否阻塞等待。
+        // 确实阻塞到指定时间后关闭
+        long time = System.currentTimeMillis();
+        sock.close();
+        System.out.println(System.currentTimeMillis() - time);
+    }
 }

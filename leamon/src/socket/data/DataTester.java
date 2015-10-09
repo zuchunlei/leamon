@@ -6,14 +6,14 @@ package socket.data;
  */
 public class DataTester {
 
-	public static void main(String[] args) {
-		byte b = -12;
-		// b && 0xff 返回的类型是 int
-		System.out.println(b & 0xff);
+    public static void main(String[] args) {
+        byte b = -12;
+        // b && 0xff 返回的类型是 int
+        System.out.println(b & 0xff);
 
-		// int --> byte
-		int num = -2021956;
-		byte bn = (byte) num;
-		System.out.println(bn);
-	}
+        // int --> byte
+        int num = -2021956;
+        byte bn = (byte) num;
+        System.out.println(bn);
+    }
 }

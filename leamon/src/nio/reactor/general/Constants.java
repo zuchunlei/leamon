@@ -5,7 +5,7 @@ package nio.reactor.general;
  */
 public interface Constants {
 
-	String PORT = "port";
-	String HOST = "host";
+    String PORT = "port";
+    String HOST = "host";
 
 }

@@ -5,8 +5,8 @@ import nio.reactor.general.io.IOHandler;
 
 public class EchoHandler implements IOHandler {
 
-	@Override
-	public DataPacket handle(DataPacket packet) {
-		return packet;
-	}
+    @Override
+    public DataPacket handle(DataPacket packet) {
+        return packet;
+    }
 }

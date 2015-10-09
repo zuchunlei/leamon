@@ -6,21 +6,21 @@ import java.nio.channels.FileChannel;
 
 public class ChannelTester {
 
-	public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
 
-		FileInputStream fis = new FileInputStream("D:/nio应注意问题.txt");
-		FileChannel channel = fis.getChannel();
+        FileInputStream fis = new FileInputStream("D:/nio应注意问题.txt");
+        FileChannel channel = fis.getChannel();
 
-		ByteBuffer buffer = ByteBuffer.allocate(100);
-		for (int i = 0; i < buffer.capacity(); i++) {
-			buffer.put((byte) i);
-		}
+        ByteBuffer buffer = ByteBuffer.allocate(100);
+        for (int i = 0; i < buffer.capacity(); i++) {
+            buffer.put((byte) i);
+        }
 
-		int length = channel.write(buffer);
-		System.out.println(length);
+        int length = channel.write(buffer);
+        System.out.println(length);
 
-		channel.close();
-		fis.close();
-	}
+        channel.close();
+        fis.close();
+    }
 
 }

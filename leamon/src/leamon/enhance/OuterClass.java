@@ -19,86 +19,86 @@ import java.util.Date;
  */
 public class OuterClass {
 
-	private static int count = 10;
+    private static int count = 10;
 
-	private static Object lock = new Object();
+    private static Object lock = new Object();
 
-	private Object value = new Object();
+    private Object value = new Object();
 
-	private Date time = new Date();
+    private Date time = new Date();
 
-	// static Object access$0(OuterClass p) {return p.value ;} 编译器织入
+    // static Object access$0(OuterClass p) {return p.value ;} 编译器织入
 
-	// static Date access$1(OuterClass p) {return p.time ;} 编译器织入
+    // static Date access$1(OuterClass p) {return p.time ;} 编译器织入
 
-	// static int access$2() {return count ;} 编译器织入
+    // static int access$2() {return count ;} 编译器织入
 
-	// static Object access$3() {return lock ;} 编译器织入
+    // static Object access$3() {return lock ;} 编译器织入
 
-	public InnerClass getInnerClassInstance() {
-		return new InnerClass();
-	}
+    public InnerClass getInnerClassInstance() {
+        return new InnerClass();
+    }
 
-	/**
-	 * 在成员内部类中编译器会自动编译织入一个域为this$0来引用当前持有该内部类对象的外围类实例。 并且该内部类实例域this$0声明为final
-	 * OuterClass this$0 !
-	 */
-	class InnerClass {
+    /**
+     * 在成员内部类中编译器会自动编译织入一个域为this$0来引用当前持有该内部类对象的外围类实例。 并且该内部类实例域this$0声明为final
+     * OuterClass this$0 !
+     */
+    class InnerClass {
 
-		// final OuterClass this$0 = OuterClassInstance; 编译器织入
+        // final OuterClass this$0 = OuterClassInstance; 编译器织入
 
-		/**
-		 * 当前方法访问外围类的实例域value
-		 */
-		public Object getValue() {
-			return value;
-		}
+        /**
+         * 当前方法访问外围类的实例域value
+         */
+        public Object getValue() {
+            return value;
+        }
 
-		/**
-		 * 当前方法访问外围类的实例域time
-		 */
-		public Date getTime() {
-			return time;
-		}
-	}
+        /**
+         * 当前方法访问外围类的实例域time
+         */
+        public Date getTime() {
+            return time;
+        }
+    }
 
-	/**
-	 * 静态内部类的对象不持有对外围类的引用，静态内部类不能直接访问外围的实例域，但是直接可以访问外围类的静态域。
-	 */
-	static class StaticInnerClass {
+    /**
+     * 静态内部类的对象不持有对外围类的引用，静态内部类不能直接访问外围的实例域，但是直接可以访问外围类的静态域。
+     */
+    static class StaticInnerClass {
 
-		/**
-		 * 当前方法访问外围类的静态域count
-		 */
-		public int getCount() {
-			return count;
-		}
+        /**
+         * 当前方法访问外围类的静态域count
+         */
+        public int getCount() {
+            return count;
+        }
 
-		/**
-		 * 当前方法访问外围类的静态域lock
-		 */
-		public Object getLock() {
-			return lock;
-		}
+        /**
+         * 当前方法访问外围类的静态域lock
+         */
+        public Object getLock() {
+            return lock;
+        }
 
-		/**
-		 * 当前方法访问外围类的实例域value
-		 */
-		public Object getValue() {
-			return getOutClassInstance().value;
-		}
+        /**
+         * 当前方法访问外围类的实例域value
+         */
+        public Object getValue() {
+            return getOutClassInstance().value;
+        }
 
-		/**
-		 * 当前方法访问外围类的实例域time
-		 */
-		public Date getTime() {
-			return getOutClassInstance().time;
-		}
+        /**
+         * 当前方法访问外围类的实例域time
+         */
+        public Date getTime() {
+            return getOutClassInstance().time;
+        }
 
-		public OuterClass getOutClassInstance() {
-			return new OuterClass();
-		}
+        public OuterClass getOutClassInstance() {
+            return new OuterClass();
+        }
 
-	}
+    }
 
 }
