@@ -12,10 +12,10 @@ public class IOWriteWork implements Runnable {
     // this.key = key;
     // }
 
-    private IOSession session;
+    // private IOSession session;
 
     public IOWriteWork(IOSession session) {
-        this.session = session;
+        // this.session = session;
     }
 
     // 取消兴趣写，写数据到信道，注册兴趣读。
@@ -31,6 +31,6 @@ public class IOWriteWork implements Runnable {
         // } catch (IOException e) {
         // e.printStackTrace();
         // }
-        session.writeData();
+        // session.writeData();
     }
 }

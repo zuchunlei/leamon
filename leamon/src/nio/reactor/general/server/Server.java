@@ -6,19 +6,15 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import nio.reactor.general.data.DataPacket;
-import nio.reactor.general.io.IOFilter;
-import nio.reactor.general.io.IOFilterChain;
-import nio.reactor.general.io.IOHandler;
+import nio.reactor.general.io.IOListener;
 
 /**
  * NIO Reactor模式的Echo Server实现
@@ -30,10 +26,11 @@ public class Server {
 
     private AtomicInteger incr;// 计数器
     private volatile boolean running;
-    private List<IOFilter> filters;// IO过滤器集合
-    private IOFilterChain chain;// 过滤链对象
-    private IOHandler handler;// 处理器对象
+    // private List<IOFilter> filters;// IO过滤器集合
+    // private IOFilterChain chain;// 过滤链对象
+    // private IOHandler handler;// 处理器对象
 
+    private IOListener listener;// IO处理器，供外部扩展
     private Poller[] pollers;// 轮询对象，处理SocketChannel的I/O事件
 
     // private AtomicBoolean accept;// 连接请求被接收的标识
@@ -42,7 +39,7 @@ public class Server {
         this.host = host;
         this.port = port;
         this.incr = new AtomicInteger(Integer.MAX_VALUE);
-        this.filters = new ArrayList<IOFilter>();
+        // this.filters = new ArrayList<IOFilter>();
 
         // this.accept = new AtomicBoolean();
         this.pollers = new Poller[Runtime.getRuntime().availableProcessors() + 1];// Poller的个数为当前可用CPU+1
@@ -51,8 +48,12 @@ public class Server {
         }
     }
 
-    public void setHandler(IOHandler handler) {
-        this.handler = handler;
+    // public void setHandler(IOHandler handler) {
+    // this.handler = handler;
+    // }
+
+    public void setListener(IOListener listener) {
+        this.listener = listener;
     }
 
     public String getHost() {
@@ -63,16 +64,16 @@ public class Server {
         return port;
     }
 
-    public IOFilterChain getIOFilterChain() {
-        if (chain == null) {
-            chain = new Node();
-        }
-        return chain;
-    }
+    // public IOFilterChain getIOFilterChain() {
+    // if (chain == null) {
+    // chain = new Node();
+    // }
+    // return chain;
+    // }
 
-    public void addIOFilter(IOFilter filter) {
-        filters.add(filter);
-    }
+    // public void addIOFilter(IOFilter filter) {
+    // filters.add(filter);
+    // }
 
     public boolean start() {
         running = true;
@@ -209,53 +210,86 @@ public class Server {
             while (running) {
                 try {
                     int selected = selector.select(1000);// 选择等待1s
-                    interRegisterEvent();// 统一事件注册方法
+                    // interRegisterEvent();// 统一事件注册方法
                     if (selected > 0) {
-                        Iterator<SelectionKey> it = selector.selectedKeys().iterator();
-                        while (it.hasNext()) {
-                            SelectionKey key = it.next();
-                            it.remove();
-                            if (key.isValid() && key.isWritable()) {// 处理写就绪事件
-                                // 取消兴趣写
-                                unRegisterWrite(key);
-                                // IOWriteWork work = new IOWriteWork(this,
-                                // key);
-                                // executor.execute(work);
-
-                                IOSession session = (IOSession) key.attachment();
-                                // session.writeData();
-                                if (session != null) {
-                                    // addWriteEvent(session);
-                                    IOWriteWork work = new IOWriteWork(session);
-                                    executor.execute(work);
-                                }
-                            }
-                            if (key.isValid() && key.isReadable()) {// 处理读就绪事件
-                                // 创建IOSession对象，该对象内部封装了具体的IO读写逻辑，以及业务处理的逻辑。
-                                IOSession session = (IOSession) key.attachment();
-
-                                // if (session == null) {
-                                // session = new IOSession(key, this);
-                                // session.setChain(getIOFilterChain());//
-                                // 设置业务处理链
-                                // key.attach(session);
-                                // }
-
-                                // 取消兴趣读，读数据，业务处理，注册兴趣写。
-                                unRegisterRead(key);// 取消所有兴趣关注点
-
-                                IOReadWork work = new IOReadWork(session);
-                                executor.execute(work);
-
-                                // session对象具体处理数据读写的逻辑
-                                // session.readData();
-                                // addReadEvent(session);
-                            }
-                        }
+                        processEvents(selector.selectedKeys());
+                        // Iterator<SelectionKey> it =
+                        // selector.selectedKeys().iterator();
+                        // while (it.hasNext()) {
+                        // SelectionKey key = it.next();
+                        // it.remove();
+                        //
+                        // IOSession session = (IOSession) key.attachment();
+                        // if(session.isReadable()){
+                        // listener.read(session);
+                        // }
+                        // // if (key.isValid() && key.isWritable()) {//
+                        // // 处理写就绪事件
+                        // // // 取消兴趣写
+                        // // // unRegisterWrite(key);
+                        // // // IOWriteWork work = new IOWriteWork(this,
+                        // // // key);
+                        // // // executor.execute(work);
+                        // //
+                        // // IOSession session = (IOSession) key.attachment();
+                        // // // session.writeData();
+                        // // if (session != null) {
+                        // // // addWriteEvent(session);
+                        // // IOWriteWork work = new IOWriteWork(session);
+                        // // executor.execute(work);
+                        // // }
+                        // // }
+                        // // if (key.isValid() && key.isReadable()) {//
+                        // // 处理读就绪事件
+                        // // // 创建IOSession对象，该对象内部封装了具体的IO读写逻辑，以及业务处理的逻辑。
+                        // // IOSession session = (IOSession) key.attachment();
+                        // //
+                        // // // if (session == null) {
+                        // // // session = new IOSession(key, this);
+                        // // // session.setChain(getIOFilterChain());//
+                        // // // 设置业务处理链
+                        // // // key.attach(session);
+                        // // // }
+                        // //
+                        // // // 取消兴趣读，读数据，业务处理，注册兴趣写。
+                        // // // unRegisterRead(key);// 取消所有兴趣关注点
+                        // //
+                        // // IOReadWork work = new IOReadWork(session);
+                        // // executor.execute(work);
+                        // //
+                        // // // session对象具体处理数据读写的逻辑
+                        // // // session.readData();
+                        // // // addReadEvent(session);
+                        // // }
+                        // }
                     }
+                    interRegisterEvent();// 统一事件注册方法
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+        }
+
+        private void processEvents(final Collection<SelectionKey> selectedKeys) {
+            for (SelectionKey key : selectedKeys) {
+                processEvent(key);
+            }
+            selectedKeys.clear();
+        }
+
+        private void processEvent(final SelectionKey key) {
+            IOSession session = (IOSession) key.attachment();
+            try {
+                if (session.isReadable()) {
+                    listener.read(session);
+                } else if (session.isWritable()) {
+                    listener.write(session);
+                }
+            } catch (Exception e) {
+                // log exception msg
+                listener.detach(session);
+                session.close();
             }
         }
 
@@ -374,10 +408,12 @@ public class Server {
                 public void run() {
                     try {
                         sc.configureBlocking(false);
-                        // sc.register(selector, SelectionKey.OP_READ);
+                        sc.register(selector, 0);// 不关注任何事件
                         IOSession session = new IOSession(sc, poller);
-                        session.setChain(getIOFilterChain());// 设置业务处理链
-                        sc.register(selector, SelectionKey.OP_READ, session);// 将IOSession与SocketChannel进行关联，注册到Poller中
+                        listener.attach(session);
+                        // session.setChain(getIOFilterChain());// 设置业务处理链
+                        // sc.register(selector, SelectionKey.OP_READ,
+                        // session);// 将IOSession与SocketChannel进行关联，注册到Poller中
                     } catch (IOException e) {
                         // ignore
                     }
@@ -393,74 +429,74 @@ public class Server {
          * 
          * @param key
          */
-        void registerRead(SelectionKey key) {
-            // readkeys.offer(key);
-            final SelectionKey sk = key;
-            events.add(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        if (!sk.isValid()) {
-                            sk.cancel();
-                            sk.channel().close();
-                        }
-                        sk.interestOps(sk.interestOps() | SelectionKey.OP_READ);
-                    } catch (IOException e) {
-                        // ignore
-                    }
-                }
-            });
-            if (wakeup.compareAndSet(false, true)) {
-                selector.wakeup();
-            }
-        }
+        // void registerRead(SelectionKey key) {
+        // // readkeys.offer(key);
+        // final SelectionKey sk = key;
+        // events.add(new Runnable() {
+        // @Override
+        // public void run() {
+        // try {
+        // if (!sk.isValid()) {
+        // sk.cancel();
+        // sk.channel().close();
+        // }
+        // sk.interestOps(sk.interestOps() | SelectionKey.OP_READ);
+        // } catch (IOException e) {
+        // // ignore
+        // }
+        // }
+        // });
+        // if (wakeup.compareAndSet(false, true)) {
+        // selector.wakeup();
+        // }
+        // }
 
         /**
          * 注册信道的写就绪事件
          * 
          * @param key
          */
-        void registerWrite(SelectionKey key) {
-            // writekeys.offer(key);
-            final SelectionKey sk = key;
-            events.add(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        if (!sk.isValid()) {
-                            sk.cancel();
-                            sk.channel().close();
-                        }
-                        sk.interestOps(sk.interestOps() | SelectionKey.OP_WRITE);
-                    } catch (IOException e) {
-                        // ignore
-                    }
-                }
-            });
-            if (wakeup.compareAndSet(false, true)) {
-                selector.wakeup();
-            }
-        }
+        // void registerWrite(SelectionKey key) {
+        // // writekeys.offer(key);
+        // final SelectionKey sk = key;
+        // events.add(new Runnable() {
+        // @Override
+        // public void run() {
+        // try {
+        // if (!sk.isValid()) {
+        // sk.cancel();
+        // sk.channel().close();
+        // }
+        // sk.interestOps(sk.interestOps() | SelectionKey.OP_WRITE);
+        // } catch (IOException e) {
+        // // ignore
+        // }
+        // }
+        // });
+        // if (wakeup.compareAndSet(false, true)) {
+        // selector.wakeup();
+        // }
+        // }
 
         /**
          * 取消兴趣读
          * 
          * @param key
          */
-        void unRegisterRead(SelectionKey key) {
-            // key.interestOps(key.interestOps() ^ SelectionKey.OP_READ);
-            key.interestOps(key.interestOps() & ~SelectionKey.OP_READ);
-        }
+        // void unRegisterRead(SelectionKey key) {
+        // // key.interestOps(key.interestOps() ^ SelectionKey.OP_READ);
+        // key.interestOps(key.interestOps() & ~SelectionKey.OP_READ);
+        // }
 
         /**
          * 取消兴趣写
          * 
          * @param key
          */
-        void unRegisterWrite(SelectionKey key) {
-            // key.interestOps(key.interestOps() ^ SelectionKey.OP_WRITE);
-            key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
-        }
+        // void unRegisterWrite(SelectionKey key) {
+        // // key.interestOps(key.interestOps() ^ SelectionKey.OP_WRITE);
+        // key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
+        // }
 
         /**
          * 读写数据的缓冲区
@@ -518,38 +554,38 @@ public class Server {
     /**
      * 过滤器链的默认实现
      */
-    class Node implements IOFilterChain {
-
-        private IOFilter filter;
-        private IOFilterChain next;
-
-        Node() {
-            this(0);
-        }
-
-        private Node(int index) {
-            if (index < filters.size()) {
-                filter = filters.get(index);
-                next = new Node(++index);
-            }
-        }
-
-        @Override
-        public void onReadComplete(DataPacket packet) {
-            if (filter != null) {
-                filter.onReadComplete(packet, next);
-                return;
-            }
-            handler.handle(packet);
-        }
-
-        @Override
-        public DataPacket onWriteReady(DataPacket packet) {
-            if (filter != null) {
-                packet = filter.onWriteReady(packet, next);
-                return packet;
-            }
-            return packet;
-        }
-    }
+    // class Node implements IOFilterChain {
+    //
+    // private IOFilter filter;
+    // private IOFilterChain next;
+    //
+    // Node() {
+    // this(0);
+    // }
+    //
+    // private Node(int index) {
+    // if (index < filters.size()) {
+    // filter = filters.get(index);
+    // next = new Node(++index);
+    // }
+    // }
+    //
+    // @Override
+    // public void onReadComplete(DataPacket packet) {
+    // if (filter != null) {
+    // filter.onReadComplete(packet, next);
+    // return;
+    // }
+    // handler.handle(packet);
+    // }
+    //
+    // @Override
+    // public DataPacket onWriteReady(DataPacket packet) {
+    // if (filter != null) {
+    // packet = filter.onWriteReady(packet, next);
+    // return packet;
+    // }
+    // return packet;
+    // }
+    // }
 }
