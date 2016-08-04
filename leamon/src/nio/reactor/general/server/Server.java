@@ -9,8 +9,6 @@ import java.nio.channels.SocketChannel;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -32,6 +30,7 @@ public class Server {
 
     private IOListener listener;// IO处理器，供外部扩展
     private Poller[] pollers;// 轮询对象，处理SocketChannel的I/O事件
+    private Acceptor acceptor;// 监听对象，处理ServerSocketChannel的accept事件
 
     // private AtomicBoolean accept;// 连接请求被接收的标识
 
@@ -46,6 +45,7 @@ public class Server {
         for (int i = 0; i < pollers.length; i++) {
             pollers[i] = new Poller();
         }
+        this.acceptor = new Acceptor();
     }
 
     // public void setHandler(IOHandler handler) {
@@ -83,22 +83,32 @@ public class Server {
             new Thread(pollers[i], name).start();
         }
         // 启动Acceptor
-        new Thread(new Acceptor(), "Acceptor Thread").start();
+        new Thread(this.acceptor, "Acceptor Thread").start();
 
         return running;
     }
 
-    public void stop() {
+    public void shutdown() {
         running = false;
+        acceptor.wakeup();
     }
 
     /**
      * 接收网络连接的接收器
      */
     class Acceptor implements Runnable {
+
+        Selector selector;// 选择器
+
+        public void wakeup() {
+            if (selector != null) {
+                selector.wakeup();
+            }
+        }
+
         public void run() {
             try {
-                Selector selector = Selector.open();
+                selector = Selector.open();
                 ServerSocketChannel servSockChannel = ServerSocketChannel.open();
                 servSockChannel.configureBlocking(false);
                 servSockChannel.socket().bind(new InetSocketAddress(host, port), 200);
@@ -170,7 +180,7 @@ public class Server {
 
         private AtomicBoolean wakeup;// 唤醒标识，原子类，排他。
         private Selector selector;
-        private Executor executor;// 具体IO执行的线程池
+        // private Executor executor;// 具体IO执行的线程池
 
         // private BlockingQueue<Runnable> ioevents;// IO读写事件
 
@@ -190,7 +200,7 @@ public class Server {
                 this.selector = Selector.open();
             } catch (IOException e) {
             }
-            this.executor = Executors.newCachedThreadPool();
+            // this.executor = Executors.newCachedThreadPool();
             // this.ioevents = new LinkedBlockingQueue<Runnable>();
 
             // handlIoEvent();// 处理IO读写事件
@@ -200,9 +210,9 @@ public class Server {
             return selector;
         }
 
-        public Executor getExecutor() {
-            return executor;
-        }
+        // public Executor getExecutor() {
+        // return executor;
+        // }
 
         public void run() {
             // handlIoEvent();// 启动IO读写线程
