@@ -30,7 +30,7 @@ public class EchoServer {
             final ByteBuffer buffer = (ByteBuffer) session.getAttribute("buffer");
             try {
                 final int count = session.getChannel().read(buffer);
-                if (count < 0) {
+                if (count < 0) {// channel read fin flag
                     session.close();
                 } else {
                     if (buffer.position() > 0) {
@@ -52,10 +52,13 @@ public class EchoServer {
             final ByteBuffer buffer = (ByteBuffer) session.getAttribute("buffer");
             try {
                 buffer.flip();
-                session.getChannel().write(buffer);
-                if (!buffer.hasRemaining()) {
-                    // nothing to write, set to read mode
-                    session.uninterestWrite().interestRead();
+                int count = session.getChannel().write(buffer);
+                if (count > 0) {// channel written data from buffer to network
+                    if (buffer.hasRemaining()) {
+                        session.interestReadWrite();
+                    } else {// nothing to write, set to read mode
+                        session.uninterestWrite().interestRead();
+                    }
                 }
                 buffer.compact();
             } catch (final IOException ex) {
