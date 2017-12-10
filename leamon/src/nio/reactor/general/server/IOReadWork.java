@@ -16,10 +16,10 @@ public class IOReadWork implements Runnable {
     // this.buffer = ByteBuffer.allocate(1024);
     // }
 
-    private IOSession session;
+    // private IOSession session;
 
     public IOReadWork(IOSession session) {
-        this.session = session;
+        // this.session = session;
     }
 
     public void run() {
@@ -37,6 +37,6 @@ public class IOReadWork implements Runnable {
         // poller.registerWrite(key);
         // } catch (IOException e) {
         // }
-        session.readData();
+        // session.readData();
     }
 }
