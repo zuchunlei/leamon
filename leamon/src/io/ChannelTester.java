@@ -8,7 +8,7 @@ public class ChannelTester {
 
     public static void main(String[] args) throws Exception {
 
-        FileInputStream fis = new FileInputStream("D:/nio应注意问题.txt");
+        FileInputStream fis = new FileInputStream("D:/nio????????.txt");
         FileChannel channel = fis.getChannel();
 
         ByteBuffer buffer = ByteBuffer.allocate(100);
