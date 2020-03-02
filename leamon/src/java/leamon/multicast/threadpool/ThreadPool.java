@@ -1,9 +1,8 @@
 package leamon.multicast.threadpool;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 线程池组件
@@ -11,7 +10,7 @@ import java.util.Queue;
 public class ThreadPool {
 
     private static final int DEFAULT_INIT_COUNT = 5;
-    private static final int DEFAULT_MAX_COUNR = 15;
+    private static final int DEFAULT_MAX_COUNT = 15;
     private static final long DEFAULT_TUNE_INTERVAL = 1000;
 
     private int initCount;
@@ -30,7 +29,7 @@ public class ThreadPool {
     }
 
     public ThreadPool() {
-        this(DEFAULT_INIT_COUNT, DEFAULT_MAX_COUNR, DEFAULT_TUNE_INTERVAL);
+        this(DEFAULT_INIT_COUNT, DEFAULT_MAX_COUNT, DEFAULT_TUNE_INTERVAL);
     }
 
     public void init() {
@@ -85,6 +84,55 @@ public class ThreadPool {
 
     public void addTask(Runnable task) {
         queue.addTask(task);
+    }
+
+    public Future submitTask(Callable callable) {
+        Callable innerTask = InnerCallable.wrap(callable);
+        queue.addTask(innerTask::call);
+        return ((InnerCallable) innerTask).future;
+    }
+
+    static class InnerCallable<T> implements Callable<T> {
+
+        public static <T> Callable<T> wrap(Callable<T> task) {
+            return new InnerCallable<>(task);
+        }
+
+        private Callable<T> task;
+
+        InnerCallable(Callable<T> task) {
+            this.task = task;
+        }
+
+        AtomicReference<T> valueRef = new AtomicReference<>();
+        AtomicBoolean doneRef = new AtomicBoolean(false);
+
+        Future<T> future = new Future<T>() {
+            @Override
+            public boolean isDone() {
+                return doneRef.get();
+            }
+
+            @Override
+            public T get() {
+                return valueRef.get();
+            }
+        };
+
+        @Override
+        public T call() {
+            T value = null;
+            try {
+                if (Objects.nonNull(task)) {
+                    value = task.call();
+                    valueRef.set(value);
+                    doneRef.set(true);
+                }
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+            return value;
+        }
     }
 
     class Worker extends Thread {
