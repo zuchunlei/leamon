@@ -6,4 +6,7 @@ public interface Future<V> {
 
     V get();
 
+    void addListener(Listener<V> listener);
+
+    void callback(V v, Throwable e);
 }

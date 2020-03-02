@@ -108,6 +108,9 @@ public class ThreadPool {
         AtomicBoolean doneRef = new AtomicBoolean(false);
 
         Future<T> future = new Future<T>() {
+
+            List<Listener> listeners = null;
+
             @Override
             public boolean isDone() {
                 return doneRef.get();
@@ -117,11 +120,29 @@ public class ThreadPool {
             public T get() {
                 return valueRef.get();
             }
+
+            @Override
+            public void addListener(Listener<T> listener) {
+                if (listeners == null) {
+                    listeners = new ArrayList<>();
+                }
+                if (!listeners.contains(listener)) {
+                    listeners.add(listener);
+                }
+            }
+
+            @Override
+            public void callback(T value, Throwable e) {
+                for (Listener listener : listeners) {
+                    listener.handle(value, e);
+                }
+            }
         };
 
         @Override
         public T call() {
             T value = null;
+            Throwable err = null;
             try {
                 if (Objects.nonNull(task)) {
                     value = task.call();
@@ -129,8 +150,9 @@ public class ThreadPool {
                     doneRef.set(true);
                 }
             } catch (Throwable e) {
-                e.printStackTrace();
+                err = e;
             }
+            future.callback(value, err);
             return value;
         }
     }
